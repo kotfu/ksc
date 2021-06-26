@@ -69,6 +69,23 @@ the help command line option:
     $ ksc -h
 
 
+## The Hyper Key
+
+Using [Karabiner Elements](https://karabiner-elements.pqrs.org/) or [BetterTouchTool](https://folivora.ai/), you can
+make `Caps Lock-T` be the same as pressing `Control-Option-Shift-Command-T`. You can always use `hyper` as a modifier
+key when entering a shortcut:
+
+    $ ksc hyper-t
+    Control-Option-Shift-Command-T
+
+If you give the `-y` or `--hyper` command line options, you will get a `Hyper` key in your output:
+
+    $ ksc -y control option shift command t
+    Hyper-T
+    # ksc -y hyper t
+    Hyper-T
+
+
 ## Apple Style
 
 This program implements the rules given in [Apple's Style Guide](https://help.apple.com/applestyleguide)

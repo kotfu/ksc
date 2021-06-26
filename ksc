@@ -60,7 +60,7 @@ def _build_parser():
         "-y",
         "--hyper",
         action="store_true",
-        help="parse and output the Hyper key as a modifier",
+        help="output the Hyper key as a modifier",
     )
 
     parser.add_argument(
@@ -222,8 +222,7 @@ class MacOSKeyboardShortcut:
         text = re.sub(r"\b(opt(ion)?|alt)\b", "~", text, re.IGNORECASE)
         text = re.sub(r"\b(comm(and)?|cmd|clover)\b", "@", text, re.IGNORECASE)
         text = re.sub(r"\b(func(tion)?|fn)\b", "*", text, re.IGNORECASE)
-        if self.options.hyper:
-            text = re.sub(r"\bhyper\b", "^$~@", text, re.IGNORECASE)
+        text = re.sub(r"\bhyper\b", "^$~@", text, re.IGNORECASE)
         mods = []
         key = ""
         # add other regexes here
@@ -298,7 +297,7 @@ class MacOSKeyboardShortcut:
     def mod_names(self):
         """return a list of modifier names for this shortcut"""
         output = []
-        if self.mods == self._hyper_mods:
+        if self.options.hyper and self.mods == self._hyper_mods:
             output.append(self._hyper_name)
         else:
             for mod in self.mods:
@@ -318,8 +317,7 @@ class MacOSKeyboardShortcut:
         """return either the key, or if it has a name return that"""
         if self.key in self._keys:
             return self._keys[self.key].name
-        # this is for human consumption, and keys are always upper case
-        return self.key.upper()
+        return self.key
 
 
 def _parse_shortcuts(args):
@@ -432,6 +430,8 @@ def test_mac_parse(argv, parsed):
         ("$@5", "Shift-Command-5"),
         ("-m $@5", "⇧⌘5"),
         ("-mp $@5", "⇧+⌘+5"),
+        ("^~$@R", "Control-Option-Shift-Command-R"),
+        ("-y ^~$@R", "Hyper-R"),
         ("-y hyper 5", "Hyper-5"),
         ("-ymp hyper 5", "⌃+⌥+⇧+⌘+5"),
         ("^leftclick", "Control-click"),
