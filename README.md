@@ -7,7 +7,7 @@ Inspired by and adapted from Brett Terpstra's
 
 Here's a few examples:
 
-```shell
+```
 $ kbdsc command shift 5
 Shift-Command-5
 $ kbdsc -y hyper t
