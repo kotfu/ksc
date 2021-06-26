@@ -106,6 +106,13 @@ def _build_parser():
     )
 
     parser.add_argument(
+        "-y",
+        "--hyper",
+        action="store_true",
+        help="ouput Hyper as a modifier",
+    )
+
+    parser.add_argument(
         "-o",
         "--output",
         choices=["txt", "html"],
@@ -124,8 +131,8 @@ class Key:
         self.html = html
 
 
-class KeyboardShortcut:
-    """methods to store and parse a keyboard shortcut
+class MacOSKeyboardShortcut:
+    """Parse, store, and render a keyboard shortcut in the macos flavor
 
     The canonical representation of a keyboard shortcut is the same as is used in macOS
     keyboard bindings files, ie:
@@ -136,8 +143,10 @@ class KeyboardShortcut:
     ~ = option
     @ = command
 
-
     """
+
+    _hyper_mods = "^~$@"
+    _hyper_name = "Hyper"
 
     # * isn't really a unicode version of the modifier, but it's included
     # here because we map between unicode and plaintext mods
@@ -209,7 +218,7 @@ class KeyboardShortcut:
         "⌫": Key("⌫", "Delete", "Delete"),
         "⌦": Key("⌦", "Forward Delete", "Forward Delete"),
         "↩": Key("↩", "Return", "Return"),
-        "⌤": Key("⌤", "Enter", "Enter"),
+        "⌅": Key("⌅", "Enter", "Enter"),
         "⇞": Key("⇞", "Page Up", "Page Up"),
         "⇟": Key("⇟", "Page Down", "Page Down"),
         "↖": Key("↖", "Home", "Home"),
@@ -228,10 +237,13 @@ class KeyboardShortcut:
     _to_shifted_trans = str.maketrans(_unshifted_keys, _shifted_keys)
     _to_unshifted_trans = str.maketrans(_shifted_keys, _unshifted_keys)
 
-    def __init__(self, text):
+    def __init__(self, text, options):
         # mods is a string, key is also a string
         # if key is alphabetic, it's stored in upper
         # case
+        #
+        # if hyper is True, parse and output Hyper as a modifier key
+        self.options = options
         self.mods, self.key = self._parse(text)
         self.canonical = "".join(self.mods) + self.key
 
@@ -241,8 +253,7 @@ class KeyboardShortcut:
     def __str__(self):
         return self.canonical
 
-    @classmethod
-    def _parse(cls, text):
+    def _parse(self, text):
         """parse input into a canonical non-unicode representation of the shortcut
 
         letters are always stored as lower case
@@ -255,23 +266,24 @@ class KeyboardShortcut:
         text = re.sub(r"\b(opt(ion)?|alt)\b", "~", text, re.IGNORECASE)
         text = re.sub(r"\b(comm(and)?|cmd|clover)\b", "@", text, re.IGNORECASE)
         text = re.sub(r"\b(func(tion)?|fn)\b", "*", text, re.IGNORECASE)
-        text = re.sub(r"\bhyper\b", "^$~@", text, re.IGNORECASE)
+        if self.options.hyper:
+            text = re.sub(r"\bhyper\b", "^$~@", text, re.IGNORECASE)
         mods = []
         key = ""
         # add other regexes here
         for char in text.strip():
             if char == " ":
                 continue
-            elif char in cls._mods_unicode:
+            elif char in self._mods_unicode:
                 # translate unicode modifier symbols to their plaintext equivilents
-                mods.append(char.translate(cls._unicode_plaintext_mods_trans))
-            elif char in cls._mods_plaintext:
+                mods.append(char.translate(self._unicode_plaintext_mods_trans))
+            elif char in self._mods_plaintext:
                 mods.append(char)
             else:
                 key += char
 
         if len(key) == 1:
-            if key in cls._shifted_keys:
+            if key in self._shifted_keys:
                 # command % should be command shift 5
                 # and command ? should be command shift ?
                 # these ↓ are the shifted number keys
@@ -279,7 +291,7 @@ class KeyboardShortcut:
                 # the unwritten apple rule that shifted numbers are
                 # written as numbers not their symbols
                 if key in "!@#$%^&*()":
-                    key = key.translate(cls._to_unshifted_trans)
+                    key = key.translate(self._to_unshifted_trans)
             else:
                 if "$" in mods:
                     # shift is in the mods, and the key is unshifted
@@ -289,15 +301,15 @@ class KeyboardShortcut:
                     # and command shift r should remain command shift r
                     if key not in "0123456789":
                         # but shift command / should be shift command ?
-                        key = key.translate(cls._to_shifted_trans)
+                        key = key.translate(self._to_shifted_trans)
 
             # shortcuts always displayed with upper case letters
             key = key.upper()
         else:
-            if key.lower() in cls._keyname_map:
+            if key.lower() in self._keyname_map:
                 # special key names, pgup, etc are in lowercase
-                key = cls._keyname_map[key.lower()]
-            elif key.upper() in cls._fkeys:
+                key = self._keyname_map[key.lower()]
+            elif key.upper() in self._fkeys:
                 # but function keys are in uppercase
                 key = key.upper()
             else:
@@ -306,16 +318,35 @@ class KeyboardShortcut:
         # remove duplicate modifiers
         mods = list(set(mods))
         # sort the mods to be in Apple's recommended order
-        mods.sort(key=lambda x: cls._mods_plaintext.index(x))
+        mods.sort(key=lambda x: self._mods_plaintext.index(x))
 
         return ("".join(mods), key)
+
+    def render(self):
+        tokens = []
+        joiner = ""
+        if self.options.modifier_symbols:
+            if self.options.plus_sign:
+                joiner = "+"
+            tokens.extend(self.mod_symbols)
+        else:
+            joiner = "-"
+            tokens.extend(self.mod_names)
+        if self.options.key_symbols:
+            tokens.extend(self.key)
+        else:
+            tokens.append(self.key_name)
+        return joiner.join(tokens)
 
     @property
     def mod_names(self):
         """return a list of modifier names for this shortcut"""
         output = []
-        for mod in self.mods:
-            output.append(self._mods_names[self._mods_plaintext.index(mod)])
+        if self.mods == self._hyper_mods:
+            output.append(self._hyper_name)
+        else:
+            for mod in self.mods:
+                output.append(self._mods_names[self._mods_plaintext.index(mod)])
         return output
 
     @property
@@ -335,7 +366,7 @@ class KeyboardShortcut:
         return self.key.upper()
 
 
-def _parse_shortcuts(text):
+def _parse_shortcuts(args):
     """parse a string or array of text into a standard representation of the shortcut
 
     returns an array of shortcut combinations
@@ -344,8 +375,8 @@ def _parse_shortcuts(text):
     to test
     """
     combos = []
-    for combo in re.split(r" / ", text):
-        combos.append(KeyboardShortcut(combo))
+    for combo in re.split(r" / ", " ".join(args.shortcuts)):
+        combos.append(MacOSKeyboardShortcut(combo, args))
     return combos
 
 
@@ -354,20 +385,7 @@ def _render_txt(combos, args):
     options in args"""
     output = []
     for combo in combos:
-        tokens = []
-        joiner = ""
-        if args.modifier_symbols:
-            if args.plus_sign:
-                joiner = "+"
-            tokens.extend(combo.mod_symbols)
-        else:
-            joiner = "-"
-            tokens.extend(combo.mod_names)
-        if args.key_symbols:
-            tokens.extend(combo.key.upper())
-        else:
-            tokens.append(combo.key_name)
-        output.append(joiner.join(tokens))
+        output.append(combo.render())
 
     return " ".join(output)
 
@@ -376,8 +394,7 @@ def main(argv=None):
     """main function"""
     parser = _build_parser()
     args = parser.parse_args(argv)
-    ##print(args)
-    combos = _parse_shortcuts(" ".join(args.shortcuts))
+    combos = _parse_shortcuts(args)
 
     if args.output == "txt":
         print(_render_txt(combos, args))
@@ -410,7 +427,7 @@ if __name__ == "__main__":
 
 
 @pytest.mark.parametrize(
-    "inp, out",
+    "argv, parsed",
     [
         ("command %", "$@5"),
         ("command shift %", "$@5"),
@@ -440,11 +457,32 @@ if __name__ == "__main__":
         ("command right", "@→"),
         ("control command del", "^@⌫"),
         ("shift ESCAPE", "$⎋"),
+        ("-y hyper 5", "^~$@5"),
     ],
 )
-def test_ks_parse(inp, out):
-    ks = KeyboardShortcut(inp)
-    assert str(ks) == out
+def test_mac_parse(argv, parsed):
+    parser = _build_parser()
+    args = parser.parse_args(argv.split())
+    combos = _parse_shortcuts(args)
+
+    assert parsed == combos[0].canonical
+
+
+@pytest.mark.parametrize(
+    "argv, out",
+    [
+        ("$@5", "Shift-Command-5"),
+        ("-m $@5", "⇧⌘5"),
+        ("-mp $@5", "⇧+⌘+5"),
+        ("-y hyper 5", "Hyper-5"),
+        ("-ymp hyper 5", "⌃+⌥+⇧+⌘+5"),
+    ],
+)
+def test_mac_render(argv, out):
+    parser = _build_parser()
+    args = parser.parse_args(argv.split())
+    combos = _parse_shortcuts(args)
+    assert out == _render_txt(combos, args)
 
 
 # def test_ks_parse():
@@ -482,16 +520,22 @@ def test_ks_parse(inp, out):
 
 
 def test_ks_parse_error():
-    errors = [
+    argvs = [
         "Q99",
         "F0",
         "F100",
         "fred",
     ]
-    for error in errors:
+    parser = _build_parser()
+    for argv in argvs:
+        args = parser.parse_args(argv.split())
         with pytest.raises(ValueError):
-            ks = KeyboardShortcut(error)
+            combos = _parse_shortcuts(args)
 
 
 def test_parse_3():
-    assert len(_parse_shortcuts("F10 / shift-escape / control-option-right")) == 3
+    parser = _build_parser()
+    argv = "F10 / shift-escape / control-option-right"
+    args = parser.parse_args(argv.split())
+    combos = _parse_shortcuts(args)
+    assert len(combos) == 3
