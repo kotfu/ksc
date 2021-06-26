@@ -11,7 +11,7 @@ import sys
 # -
 
 # to be removed later
-# import pytest
+#import pytest
 
 # constants
 VERSION_STRING = "0.1.0"
@@ -331,7 +331,7 @@ def _parse_shortcuts(args):
     to test
     """
     combos = []
-    for combo in re.split(r" / ", " ".join(args.shortcuts)):
+    for combo in re.split(r" [/|] ", " ".join(args.shortcuts)):
         combos.append(MacOSKeyboardShortcut(combo, args))
     return combos
 
@@ -494,9 +494,13 @@ def test_ks_parse_error():
             combos = _parse_shortcuts(args)
 
 
-def test_parse_3():
+def test_parse_multiple():
+    parsemap = [
+        ("F10 / shift-escape / control-option-right", 3),
+        ("control x | control c", 2),
+    ]
     parser = _build_parser()
-    argv = "F10 / shift-escape / control-option-right"
-    args = parser.parse_args(argv.split())
-    combos = _parse_shortcuts(args)
-    assert len(combos) == 3
+    for argv, count in parsemap:
+        args = parser.parse_args(argv.split())
+        combos = _parse_shortcuts(args)
+    assert len(combos) == count
