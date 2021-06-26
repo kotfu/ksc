@@ -250,11 +250,12 @@ class KeyboardShortcut:
         # Only remove hyphens preceeded and followed by non-space character
         # to avoid removing the last hyphen from 'option-shift--' or 'command -'
         text = re.sub(r"(?<=\S)-(?=\S)", " ", text)
-        text = re.sub(r"\b(comm(and)?|cmd|clover)\b", "@", text, re.IGNORECASE)
         text = re.sub(r"\b(cont(rol)?|ctl|ctrl)\b", "^", text, re.IGNORECASE)
-        text = re.sub(r"\b(opt(ion)?|alt)\b", "~", text, re.IGNORECASE)
         text = re.sub(r"\bshift\b", "$", text, re.IGNORECASE)
+        text = re.sub(r"\b(opt(ion)?|alt)\b", "~", text, re.IGNORECASE)
+        text = re.sub(r"\b(comm(and)?|cmd|clover)\b", "@", text, re.IGNORECASE)
         text = re.sub(r"\b(func(tion)?|fn)\b", "*", text, re.IGNORECASE)
+        text = re.sub(r"\bhyper\b", "^$~@", text, re.IGNORECASE)
         mods = []
         key = ""
         # add other regexes here
