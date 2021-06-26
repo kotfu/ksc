@@ -457,6 +457,8 @@ if __name__ == "__main__":
         ("command right", "@→"),
         ("control command del", "^@⌫"),
         ("shift ESCAPE", "$⎋"),
+        ("control click", "^leftclick"),
+        ("option rightclick", "~rightclick"),
         ("-y hyper 5", "^~$@5"),
     ],
 )
@@ -476,6 +478,8 @@ def test_mac_parse(argv, parsed):
         ("-mp $@5", "⇧+⌘+5"),
         ("-y hyper 5", "Hyper-5"),
         ("-ymp hyper 5", "⌃+⌥+⇧+⌘+5"),
+        ("^leftclick", "Control-click"),
+        ("~rightclick", "Option-right click"),
     ],
 )
 def test_mac_render(argv, out):
