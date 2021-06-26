@@ -92,9 +92,9 @@ You can also have the modifier symbols output as their ASCII representation by u
 
 Using [Karabiner Elements](https://karabiner-elements.pqrs.org/) or
 [BetterTouchTool](https://folivora.ai/), you can make `Caps Lock-T` be the same as
-pressing `Control-Option-Shift-Command-T`. This has come to be known as the [Hyper
-key](https://statusq.org/archives/2016/09/25/7857/). You can always use `hyper` as a
-modifier key when entering a keyboard shortcut:
+pressing `Control-Option-Shift-Command-T`. Mac nerds call this the [Hyper
+key](https://statusq.org/archives/2016/09/25/7857/). You can always
+use `hyper` as a modifier key when entering a keyboard shortcut:
 
     $ ksc hyper-t
     Control-Option-Shift-Command-T

@@ -5,13 +5,14 @@
 import argparse
 import re
 import sys
+import textwrap
 
 # Features to be added
 # - add a -t=mac, win option
 # -
 
 # to be removed later
-#import pytest
+import pytest
 
 # constants
 VERSION_STRING = "0.1.0"
@@ -22,10 +23,24 @@ EXIT_USAGE = 2
 
 def _build_parser():
     """build an arg parser with all the proper parameters"""
+    desc = "Create a standardized representation of a MacOS keyboard shortcut."
+    epilog = """\
+        Keyboard shortcuts can be entered in many ways:
+
+            command shift F
+            option command h
+            control option command space
+
+        Separate multiple shortcuts with ' / ':
+
+            control x / control c
+        """
     parser = argparse.ArgumentParser(
-        description="Create a standardized representation of a macOS keyboard shortcut"
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=desc,
+        epilog=textwrap.dedent(epilog),
     )
-    parser.add_argument("shortcuts", nargs="+", help="keyboard shortcut(s)")
+    parser.add_argument("shortcuts", nargs="+", help="keyboard shortcuts")
 
     parser.add_argument(
         "-v",
@@ -67,13 +82,25 @@ def _build_parser():
         help="output key symbols instead of key names",
     )
 
-    parser.add_argument(
-        "-o",
-        "--output",
-        choices=["txt", "html"],
-        default="txt",
-        help="output format",
-    )
+    # parser.add_argument(
+    #     "-o",
+    #     "--output",
+    #     choices=["txt", "html"],
+    #     default="txt",
+    #     help="output format",
+    # )
+    # parser.add_argument(
+    #     "-s",
+    #     "--style",
+    #     choices=["mac", "win"],
+    #     default="mac",
+    #     help="style of shortcut based on operating system",
+    # )
+    # parser.add_argument(
+    #     "-t",
+    #     "--template",
+    #     help="tempate to use for html output",
+    # )
     return parser
 
 
