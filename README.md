@@ -1,6 +1,8 @@
-# kbdsc
+# ksc
 
 A command line tool to create standardized and properly formatted keyboard shortcuts.
+
+The name of this program is a shorthand for (k)eyboard (s)hort(c)ut.
 
 Inspired by and adapted from Brett Terpstra's
 [kbd plugin for Jekyll](https://github.com/ttscoff/JekyllPlugins/tree/master/KBDTag).
@@ -8,20 +10,20 @@ Inspired by and adapted from Brett Terpstra's
 Here's a few examples:
 
 ```
-$ kbdsc command shift 5
+$ ksc command shift 5
 Shift-Command-5
-$ kbdsc -y hyper t
+$ ksc -y hyper t
 Hyper-T
-$ kbdsc control +
+$ ksc control +
 Control-Shift-+
-$ kbdsc ⌘⇧F
+$ ksc ⌘⇧F
 Shift-Command-F
 ```
 
 
 ## Installation
 
-You'll need Python 3 on your system. Download `kbdsc` and put it in your path.
+You'll need Python 3 on your system. Download `ksc` and put it in your path.
 
 
 ## Commmand Line Usage

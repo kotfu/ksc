@@ -11,7 +11,7 @@ import sys
 # -
 
 # to be removed later
-import pytest
+# import pytest
 
 # constants
 VERSION_STRING = "0.1.0"
