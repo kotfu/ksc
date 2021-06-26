@@ -109,7 +109,7 @@ def _build_parser():
         "-y",
         "--hyper",
         action="store_true",
-        help="ouput Hyper as a modifier",
+        help="parse and output the Hyper key as a modifier",
     )
 
     parser.add_argument(
@@ -142,6 +142,8 @@ class MacOSKeyboardShortcut:
     $ = shift
     ~ = option
     @ = command
+
+    The Hyper key is shorthand for Control-Shift-Option-Command
 
     """
 
@@ -179,8 +181,8 @@ class MacOSKeyboardShortcut:
         "fwddelete": "⌦",
         "return": "↩",
         "rtn": "↩",
-        "enter": "⌤",
-        "ent": "⌤",
+        "enter": "⌅",
+        "ent": "⌅",
         "pageup": "⇞",
         "pgup": "⇞",
         "pagedown": "⇟",
@@ -256,8 +258,11 @@ class MacOSKeyboardShortcut:
     def _parse(self, text):
         """parse input into a canonical non-unicode representation of the shortcut
 
-        letters are always stored as lower case
+        letters are always stored as upper case, special key names are always
+        stored as lower case
         """
+        # save the original text for an error message
+        orig_text = text
         # Only remove hyphens preceeded and followed by non-space character
         # to avoid removing the last hyphen from 'option-shift--' or 'command -'
         text = re.sub(r"(?<=\S)-(?=\S)", " ", text)
@@ -313,7 +318,7 @@ class MacOSKeyboardShortcut:
                 # but function keys are in uppercase
                 key = key.upper()
             else:
-                raise ValueError("{} is not a valid key".format(key))
+                raise ValueError("Could not parse '{}'".format(orig_text))
 
         # remove duplicate modifiers
         mods = list(set(mods))
@@ -529,6 +534,7 @@ def test_ks_parse_error():
         "F0",
         "F100",
         "fred",
+        "command - shift 5",
     ]
     parser = _build_parser()
     for argv in argvs:
