@@ -68,17 +68,39 @@ the help command line option:
 
     $ ksc -h
 
+There are several command line options to modify the output:
+
+The `-ms` or `--modifier-symbols` options output the modifers as unicode symbols:
+
+    $ ksc -ms shift command u
+    ⇧⌘U
+
+Apple says you should include a plus sign between symbols, but I think that it looks ugly,
+so that's not the default. If you want it, add the `-p` or `--plus-sign` when using `-ms`:
+
+    $ ksc -ms -p shift command u
+    ⇧+⌘+U
+
+You can also have the modifier symbols output as their ASCII representation by using the `-ma` or
+`--modifier-ascii` options:
+
+    $ ksc -ma shift command u
+    $@U
+
 
 ## The Hyper Key
 
-Using [Karabiner Elements](https://karabiner-elements.pqrs.org/) or [BetterTouchTool](https://folivora.ai/), you can
-make `Caps Lock-T` be the same as pressing `Control-Option-Shift-Command-T`. You can always use `hyper` as a modifier
-key when entering a shortcut:
+Using [Karabiner Elements](https://karabiner-elements.pqrs.org/) or
+[BetterTouchTool](https://folivora.ai/), you can make `Caps Lock-T` be the same as
+pressing `Control-Option-Shift-Command-T`. This has come to be known as the [Hyper
+key](https://statusq.org/archives/2016/09/25/7857/). You can always use `hyper` as a
+modifier key when entering a keyboard shortcut:
 
     $ ksc hyper-t
     Control-Option-Shift-Command-T
 
-If you give the `-y` or `--hyper` command line options, you will get a `Hyper` key in your output:
+If you give the `-y` or `--hyper` command line option, you will get a `Hyper` key in
+your output when it's appropriate:
 
     $ ksc -y control option shift command t
     Hyper-T

@@ -34,12 +34,30 @@ def _build_parser():
         version=VERSION_STRING,
         help="show the version information and exit",
     )
-
-    parser.add_argument(
-        "-m",
+    mod_group = parser.add_mutually_exclusive_group()
+    mod_group.add_argument(
+        "-ma",
+        "--modifier-ascii",
+        action="store_true",
+        help="output modifiers as ASCII characters instead of modifier names",
+    )
+    mod_group.add_argument(
+        "-ms",
         "--modifier-symbols",
         action="store_true",
         help="output modifier symbols instead of modifier names",
+    )
+    parser.add_argument(
+        "-p",
+        "--plus-sign",
+        action="store_true",
+        help="output + between modifier symbols, only used if -ms",
+    )
+    parser.add_argument(
+        "-y",
+        "--hyper",
+        action="store_true",
+        help="output Hyper as a modifier name",
     )
 
     parser.add_argument(
@@ -47,20 +65,6 @@ def _build_parser():
         "--key-symbols",
         action="store_true",
         help="output key symbols instead of key names",
-    )
-
-    parser.add_argument(
-        "-p",
-        "--plus-sign",
-        action="store_true",
-        help="output + between modifier symbols, only used if -m",
-    )
-
-    parser.add_argument(
-        "-y",
-        "--hyper",
-        action="store_true",
-        help="output the Hyper key as a modifier",
     )
 
     parser.add_argument(
@@ -284,6 +288,9 @@ class MacOSKeyboardShortcut:
             if self.options.plus_sign:
                 joiner = "+"
             tokens.extend(self.mod_symbols)
+        elif self.options.modifier_ascii:
+            joiner = ""
+            tokens.extend(self.mods)
         else:
             joiner = "-"
             tokens.extend(self.mod_names)
