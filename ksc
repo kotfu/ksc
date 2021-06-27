@@ -40,7 +40,7 @@ def _build_parser():
         description=desc,
         epilog=textwrap.dedent(epilog),
     )
-    parser.add_argument("shortcuts", nargs="+", help="keyboard shortcuts")
+    parser.add_argument("shortcuts", nargs="*", help="keyboard shortcuts")
 
     parser.add_argument(
         "-v",
@@ -82,10 +82,16 @@ def _build_parser():
         help="output key symbols instead of key names",
     )
 
+    parser.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        help="list all modifier and key names",
+    )
     # parser.add_argument(
     #     "-o",
     #     "--output",
-    #     choices=["txt", "html"],
+    #     choices=["txt", "html", "json"],
     #     default="txt",
     #     help="output format",
     # )
@@ -184,9 +190,11 @@ class MacOSKeyboardShortcut:
         "rightclick": "rightclick",
         "rclick": "rightclick",
     }
-    # programatically create 99 function keys
+    # programatically create 35 function keys
+    # we choose 35 because that's how many are defined in NSEvent()
+    # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?preferredLanguage=occ
     _fkeys = []
-    for num in range(1, 100):
+    for num in range(1, 36):
         fkey = "F{}".format(num)
         _fkeys.append(fkey)
 
@@ -194,7 +202,7 @@ class MacOSKeyboardShortcut:
     #   friendly name, and/or text description
     _keys = {
         "-": Key("-", "Hyphen", "Hyphen"),
-        "⎋": Key("⎋", "Escape", "Escape??"),
+        "⎋": Key("⎋", "Escape", "Escape"),
         "⇥": Key("⇥", "Tab", "Tab"),
         "⇪": Key("⇪", "Caps Lock", "Caps Lock"),
         "␣": Key("␣", "Space", "Space"),
@@ -308,7 +316,27 @@ class MacOSKeyboardShortcut:
 
         return ("".join(mods), key)
 
+    @classmethod
+    def named_keys(cls, args):
+        """Return a string containing a formatted list of all known keys"""
+        # start with the modifiers
+        output = []
+        output.append("Modifiers:")
+        output.extend(map(lambda x: ("\t{}".format(x)), cls._mods_names))
+        if args.hyper:
+            output.append("\t{}".format(cls._hyper_name))
+
+        output.append("Named Keys:")
+        output.extend(
+            map(lambda x: ("\t{}".format(cls._keys[x].name)), cls._keys.keys())
+        )
+        output.extend(
+            map(lambda x: ("\t{}".format(x)), cls._fkeys)
+        )
+        return "\n".join(output)
+
     def render(self):
+        """render this key as a string for human consumption"""
         tokens = []
         joiner = ""
         if self.options.modifier_symbols:
@@ -382,9 +410,15 @@ def main(argv=None):
     """main function"""
     parser = _build_parser()
     args = parser.parse_args(argv)
-    combos = _parse_shortcuts(args)
 
-    if args.output == "txt":
+    if args.list:
+        # list all available keys, don't parse any input
+        print(MacOSKeyboardShortcut.named_keys(args))
+        return EXIT_SUCCESS
+
+    combos = _parse_shortcuts(args)
+    # if args.output == "txt":
+    if True:
         print(_render_txt(combos, args))
     elif args.output == "html":
         pass

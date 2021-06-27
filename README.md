@@ -108,6 +108,13 @@ your output when it's appropriate:
     Hyper-T
 
 
+## Tips and Tricks
+
+* You can easily get the unicode symbol for a key and put it on your clipboard (on MacOS) with:
+
+      $ ksc -k home | pbcopy
+
+
 ## Apple Style
 
 This program implements the rules given in [Apple's Style Guide](https://help.apple.com/applestyleguide)
