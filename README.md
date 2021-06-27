@@ -68,24 +68,39 @@ the help command line option:
 
     $ ksc -h
 
-There are several command line options to modify the output:
-
-The `-ms` or `--modifier-symbols` options output the modifers as unicode symbols:
+There are several command line options to modify the output. The `-ms` or
+`--modifier-symbols` options output the modifers as unicode symbols:
 
     $ ksc -ms shift command u
     ⇧⌘U
 
-Apple says you should include a plus sign between symbols, but I think that it looks ugly,
-so that's not the default. If you want it, add the `-p` or `--plus-sign` when using `-ms`:
+Apple says you should include a plus sign between symbols, but I think that it looks
+ugly, so that's not the default. If you want it, add the `-p` or `--plus-sign` when
+using `-ms`:
 
     $ ksc -ms -p shift command u
     ⇧+⌘+U
 
-You can also have the modifier symbols output as their ASCII representation by using the `-ma` or
-`--modifier-ascii` options:
+You can also have the modifier symbols output as their ASCII representation by using
+the `-ma` or `--modifier-ascii` options:
 
     $ ksc -ma shift command u
     $@U
+
+The `-k` or `--key-symbols` argument causes all keys to be output as their symbol,
+instead of their name. Makes most sense when used with `-ms`:
+
+    $ ksc -ms -k control option pageup
+    ⌃⌥⇞
+
+The `-c` or `--clarify-keys` outputs some less-readable keys as names and symbols,
+instead of just symbols. This setting is ignored if you use `-k`. Here's you can see
+the difference when you use `-c`:
+
+    $ ksc command .
+    Command-.
+    $ ksc -c command .
+    Command-Period (.)
 
 
 ## The Hyper Key

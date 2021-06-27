@@ -81,6 +81,12 @@ def _build_parser():
         action="store_true",
         help="output key symbols instead of key names",
     )
+    parser.add_argument(
+        "-c",
+        "--clarify-keys",
+        action="store_true",
+        help="clarify hard to read keys by spelling out their name, ignored if -k"
+    )
 
     parser.add_argument(
         "-l",
@@ -223,6 +229,16 @@ class MacOSKeyboardShortcut:
         "rightclick": Key("rightclick", "right click", "right click"),
     }
 
+    _clarified_keys = {
+        ",": Key(",", "Comma (,)", "Comma (,)"),
+        ".": Key(".", "Period (.)", "Period (.)"),
+        ";": Key(";", "Semicolon (.)", "Semicolon (;)"),
+        ":": Key(":", "Colon (:)", "Colon (:)"),
+        "`": Key("`", "Backtick (`)", "Backtick (`)"),
+        "-": Key("-", "Minus (-)", "Minus (-)"),
+        "+": Key("+", "Plus (+)", "Plus (+)"),
+        "~": Key("~", "Tilde (~)", "Tilde (~)"),
+    }
     # shifted key translations
     _unshifted_keys = r",./;'[]\1234567890-="
     _shifted_keys = r'<>?:"{}|!@#$%^&*()_+'
@@ -377,6 +393,8 @@ class MacOSKeyboardShortcut:
     @property
     def key_name(self):
         """return either the key, or if it has a name return that"""
+        if self.options.clarify_keys and self.key in self._clarified_keys:
+            return self._clarified_keys[self.key].name
         if self.key in self._keys:
             return self._keys[self.key].name
         return self.key
@@ -496,14 +514,15 @@ def test_mac_parse(argv, parsed):
     "argv, out",
     [
         ("$@5", "Shift-Command-5"),
-        ("-m $@5", "⇧⌘5"),
-        ("-mp $@5", "⇧+⌘+5"),
+        ("-ms $@5", "⇧⌘5"),
+        ("-ms -p $@5", "⇧+⌘+5"),
         ("^~$@R", "Control-Option-Shift-Command-R"),
         ("-y ^~$@R", "Hyper-R"),
         ("-y hyper 5", "Hyper-5"),
-        ("-ymp hyper 5", "⌃+⌥+⇧+⌘+5"),
+        ("-yp -ms hyper 5", "⌃+⌥+⇧+⌘+5"),
         ("^leftclick", "Control-click"),
         ("~rightclick", "Option-right click"),
+        ("-c @.", "Command-Period (.)"),
     ],
 )
 def test_mac_render(argv, out):
