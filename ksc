@@ -229,6 +229,18 @@ class MacOS:
             fkey = "F{}".format(num)
             self.keys.append(Key(fkey, fkey))
 
+    def parse_shortcuts(self, args):
+        """parse a string or array of text into a standard representation of the shortcut
+
+        uses args from the command line to influence parsing behavior
+
+        returns an array of shortcut combinations
+        """
+        combos = []
+        for combo in re.split(r" [/|] ", " ".join(args.shortcuts)):
+            combos.append(MacOSKeyboardShortcut(combo, args))
+        return combos
+
 
 class MacOSKeyboardShortcut:
     """Parse, store, and render a keyboard shortcut in the macos flavor
@@ -503,20 +515,6 @@ class MacOSKeyboardShortcut:
         return self.key
 
 
-def _parse_shortcuts(args):
-    """parse a string or array of text into a standard representation of the shortcut
-
-    returns an array of shortcut combinations
-
-    this is a short function only called in one place, but it makes it much easier
-    to test
-    """
-    combos = []
-    for combo in re.split(r" [/|] ", " ".join(args.shortcuts)):
-        combos.append(MacOSKeyboardShortcut(combo, args))
-    return combos
-
-
 def _render_txt(combos, args):
     """render as plain text a list of keyboard combinations according to the
     options in args"""
@@ -537,7 +535,8 @@ def main(argv=None):
         print(MacOSKeyboardShortcut.named_keys(args))
         return EXIT_SUCCESS
 
-    combos = _parse_shortcuts(args)
+    macos = MacOS()
+    combos = macos.parse_shortcuts(args)
     # if args.output == "txt":
     if True:
         print(_render_txt(combos, args))
@@ -608,7 +607,8 @@ if __name__ == "__main__":
 def test_mac_parse(argv, parsed):
     parser = _build_parser()
     args = parser.parse_args(argv.split())
-    combos = _parse_shortcuts(args)
+    macos = MacOS()
+    combos = macos.parse_shortcuts(args)
 
     assert parsed == combos[0].canonical
 
@@ -631,7 +631,8 @@ def test_mac_parse(argv, parsed):
 def test_mac_render(argv, out):
     parser = _build_parser()
     args = parser.parse_args(argv.split())
-    combos = _parse_shortcuts(args)
+    macos = MacOS()
+    combos = macos.parse_shortcuts(args)
     assert out == _render_txt(combos, args)
 
 
@@ -680,8 +681,9 @@ def test_ks_parse_error():
     parser = _build_parser()
     for argv in argvs:
         args = parser.parse_args(argv.split())
+        macos = MacOS()
         with pytest.raises(ValueError):
-            combos = _parse_shortcuts(args)
+            combos = macos.parse_shortcuts(args)
 
 
 def test_parse_multiple():
@@ -692,5 +694,7 @@ def test_parse_multiple():
     parser = _build_parser()
     for argv, count in parsemap:
         args = parser.parse_args(argv.split())
-        combos = _parse_shortcuts(args)
+        macos = MacOS()
+        combos = macos.parse_shortcuts(args)
+
     assert len(combos) == count
