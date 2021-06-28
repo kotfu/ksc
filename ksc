@@ -113,10 +113,115 @@ def _build_parser():
 class Key:
     """store the name of a key, the html rendering of it, and a friendly text render of it"""
 
-    def __init__(self, key, name, html):
+    def __init__(
+        self,
+        key,
+        name,
+        input_names=None,
+        shifted_key=None,
+        html_entity=None,
+        clarified_name=None,
+        ascii=None,
+        modifier=False,
+    ):
         self.key = key
+        """The (usually) single character representation of the key. For modifiers and
+        most other named keys, we use the unicode representation, i.e. ⌘ for command,
+        → for Right Arrow, etc."""
+
         self.name = name
-        self.html = html
+        """The name of this key spelled out, ie the ← key is Left Arrow. If
+        the key is F, the name is F."""
+
+        self.input_names = input_names
+        """A list of names which a user can input to reference this key"""
+
+        self.shifted_key = shifted_key
+        """If the key has a different output when the shift key is pressed, put
+        the shifted value here"""
+
+        self.clarified_name = clarified_name
+        """Some keys can benefit from a clarified name, like Period (.) instead of ."""
+
+        self.html_entity = html_entity
+        """If this key has an HTML entity, store it here"""
+
+        self.modifier = modifier
+        """True if this key is a modifier key, like Fn, Shift, etc."""
+
+        self.ascii = ascii
+        """If the key is a modifier, it also has an ASCII representation, like ~ for Option"""
+
+
+# make a list of keys, if the key isn't in this list (like F or R), then
+# it's just a single character key with nothing special about it
+class MacOS:
+    """All the keys and their properties for MacOS"""
+
+    def __init__(self):
+        self.keys = [
+            Key("Fn", "Fn", ["func", "function", "fn"], ascii="*", modifier=True),
+            Key(
+                "⌃",
+                "Control",
+                ["control", "cont", "ctrl", "ctl"],
+                ascii="^",
+                modifier=True,
+            ),
+            Key("⇧", "Shift", ["shift", "shft"], ascii="$", modifier=True),
+            Key("⌥", "Option", ["option", "opt", "alt"], ascii="~", modifier=True),
+            Key("⌘", "Command", ["command", "cmd", "clover"], ascii="@", modifier=True),
+            Key("⎋", "Escape", ["escape", "esc"]),
+            Key("⇥", "Tab", ["tab"]),
+            Key("⇪", "Caps Lock", ["capslock", "caps"]),
+            Key("␣", "Space", ["space"]),
+            Key("⏏", "Eject", ["eject"]),
+            Key("⌫", "Delete", ["delete", "del"]),
+            Key(
+                "⌦",
+                "Forward Delete",
+                ["forwarddelete", "fwddelete", "forwarddel", "fwddel"],
+            ),
+            Key("↩", "Return", ["return", "rtn"]),
+            Key("⌅", "Enter", ["enter", "ent"]),
+            Key("⇞", "Page Up", ["pageup", "pgup"]),
+            Key("⇟", "Page Down", ["pagedown", "pgdown"]),
+            Key("↖", "Home", ["home"]),
+            Key("↘", "End", ["end"]),
+            Key("←", "Left Arrow", ["leftarrow", "left"]),
+            Key("→", "Right Arrow", ["rightarrow", "right"]),
+            Key("↑", "Up Arrow", ["uparrow", "up"]),
+            Key("↓", "Down Arrow", ["downarrow", "down"]),
+            Key("leftclick", "click", ["leftclick", "click"]),
+            Key("rightclick", "right click", ["rightclick", "rclick"]),
+            Key("`", "`", shifted_key="~"),
+            Key("1", "1", shifted_key="!"),
+            Key("2", "2", shifted_key="@"),
+            Key("3", "3", shifted_key="#"),
+            Key("4", "4", shifted_key="$"),
+            Key("5", "5", shifted_key="!"),
+            Key("6", "6", shifted_key="@"),
+            Key("7", "7", shifted_key="#"),
+            Key("8", "8", shifted_key="$"),
+            Key("9", "9", shifted_key="#"),
+            Key("0", "0", shifted_key="$"),
+            Key("-", "Hyphen", shifted_key="_"),
+            Key("=", "=", shifted_key="+"),
+            Key("[", "[", shifted_key="{"),
+            Key("]", "]", shifted_key="]"),
+            Key("\\", "\\", shifted_key="|"),
+            Key(";", ";", shifted_key=":", clarified_name="Semicolon (;)"),
+            Key("'", "'", shifted_key='"'),
+            Key(",", ",", shifted_key="<", clarified_name="Comma (,)"),
+            Key(".", ".", shifted_key=">", clarified_name="Period (.)"),
+            Key("/", "/", shifted_key="?", clarified_name="Slash (.)"),
+        ]
+        # programatically create 35 function keys
+        # we choose 35 because that's how many are defined in NSEvent()
+        # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?preferredLanguage=occ
+        for num in range(1, 36):
+            fkey = "F{}".format(num)
+            self.keys.append(Key(fkey, fkey))
 
 
 class MacOSKeyboardShortcut:
@@ -330,9 +435,7 @@ class MacOSKeyboardShortcut:
         output.extend(
             map(lambda x: ("\t{}".format(cls._keys[x].name)), cls._keys.keys())
         )
-        output.extend(
-            map(lambda x: ("\t{}".format(x)), cls._fkeys)
-        )
+        output.extend(map(lambda x: ("\t{}".format(x)), cls._fkeys))
         return "\n".join(output)
 
     def render(self):
@@ -496,12 +599,12 @@ def test_mac_parse(argv, parsed):
     "argv, out",
     [
         ("$@5", "Shift-Command-5"),
-        ("-m $@5", "⇧⌘5"),
-        ("-mp $@5", "⇧+⌘+5"),
+        ("-ms $@5", "⇧⌘5"),
+        ("-ms -p $@5", "⇧+⌘+5"),
         ("^~$@R", "Control-Option-Shift-Command-R"),
         ("-y ^~$@R", "Hyper-R"),
         ("-y hyper 5", "Hyper-5"),
-        ("-ymp hyper 5", "⌃+⌥+⇧+⌘+5"),
+        ("-y -ms -p hyper 5", "⌃+⌥+⇧+⌘+5"),
         ("^leftclick", "Control-click"),
         ("~rightclick", "Option-right click"),
     ],
