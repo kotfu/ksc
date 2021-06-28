@@ -85,7 +85,7 @@ def _build_parser():
         "-c",
         "--clarify-keys",
         action="store_true",
-        help="clarify hard to read keys by spelling out their name, ignored if -k"
+        help="clarify hard to read keys by spelling out their name, ignored if -k",
     )
 
     parser.add_argument(
