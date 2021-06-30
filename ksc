@@ -238,17 +238,21 @@ class MacOS:
     # source
     hyper_mods = "^~$@"
     hyper_name = "Hyper"
+    hyper_regex = r"\b" + hyper_name.lower() + r"\b"
 
     mods_names = []
     mods_plaintext = []
     mods_unicode = []
     unshifted_keys = ""
     shifted_keys = ""
+    mods_regex_map = []
     for _key in keys:
         if _key.modifier:
             mods_names.append(_key.name)
             mods_plaintext.append(_key.ascii)
             mods_unicode.append(_key.key)
+            _regex = r"\b(" + "|".join(_key.input_names) + r")\b"
+            mods_regex_map.append((_key.ascii, _regex))
         if _key.shifted_key:
             unshifted_keys += _key.key
             shifted_keys += _key.shifted_key
@@ -313,31 +317,38 @@ class MacOS:
         """
         # save the original text for an error message
         orig_text = text
+        mods = []
+        key = ""
         # Only remove hyphens preceeded and followed by non-space character
         # to avoid removing the last hyphen from 'option-shift--' or 'command -'
         text = re.sub(r"(?<=\S)-(?=\S)", " ", text)
-        # TODO fix these to programatically generate the regexs from cls.keys
-        text = re.sub(r"\b(cont(rol)?|ctl|ctrl)\b", "^", text, re.IGNORECASE)
-        text = re.sub(r"\bshift\b", "$", text, re.IGNORECASE)
-        text = re.sub(r"\b(opt(ion)?|alt)\b", "~", text, re.IGNORECASE)
-        text = re.sub(r"\b(comm(and)?|cmd|clover)\b", "@", text, re.IGNORECASE)
-        text = re.sub(r"\b(func(tion)?|fn)\b", "*", text, re.IGNORECASE)
-        text = re.sub(r"\bhyper\b", "^$~@", text, re.IGNORECASE)
-        mods = []
-        key = ""
-        # add other regexes here
+        # remove words that represent modifiers from the text, and add them
+        # to the 'mods' array
+        for (modkey, regex) in cls.mods_regex_map:
+            (text, cnt) = re.subn(regex, "", text, re.IGNORECASE)
+            if cnt:
+                mods.append(modkey)
+        # do the hyper key
+        (text, cnt) = re.subn(cls.hyper_regex, "", text, re.IGNORECASE)
+        if cnt:
+            for modkey in cls.hyper_mods:
+                mods.append(modkey)
+
+        # process the remainder of the text
         for char in text.strip():
             if char == " ":
                 continue
             elif char in cls.mods_unicode:
                 # translate unicode modifier symbols to their plaintext equivilents
                 mods.append(char.translate(cls.unicode_plaintext_mods_trans))
-            elif char in cls.mods_plaintext:
+            elif char in cls.mods_plaintext and char not in mods:
+                # but since plaintext modifiers could also be a key, aka
+                # @$@ really means command-shift-2, we only treat the first
+                # occurance of a plaintext modifier as a modifier, subsequent
+                # occurances are the key
                 mods.append(char)
             else:
                 key += char
-
-        import ipdb; ipdb.set_trace()
 
         if len(key) == 1:
             if key in cls.shifted_keys:
@@ -513,8 +524,9 @@ if __name__ == "__main__":
 @pytest.mark.parametrize(
     "inp, parsed",
     [
+        ("command 2", "@2"),
+        ("command shift 2", "$@2"),
         ("command %", "$@5"),
-        ("command 2", "@@"),
         ("command shift %", "$@5"),
         ("command shift 5", "$@5"),
         ("shift control 6", "^$6"),
