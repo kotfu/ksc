@@ -172,10 +172,10 @@ class MacOS:
         # recommended order for displaying modifier keys
         Key("*", "Fn", ["func", "function", "fn"], ascii="*", modifier=True),
         Key(
-            "⌃", # this is not a caret, it's another unicode character
+            "⌃",  # this is not a caret, it's another unicode character
             "Control",
             ["control", "cont", "ctrl", "ctl"],
-            ascii="^", # this one is a caret
+            ascii="^",  # this one is a caret
             modifier=True,
         ),
         Key("⌥", "Option", ["option", "opt", "alt"], ascii="~", modifier=True),
@@ -209,16 +209,16 @@ class MacOS:
         Key("2", "2", shifted_key="@"),
         Key("3", "3", shifted_key="#"),
         Key("4", "4", shifted_key="$"),
-        Key("5", "5", shifted_key="!"),
-        Key("6", "6", shifted_key="@"),
-        Key("7", "7", shifted_key="#"),
-        Key("8", "8", shifted_key="$"),
-        Key("9", "9", shifted_key="#"),
-        Key("0", "0", shifted_key="$"),
+        Key("5", "5", shifted_key="%"),
+        Key("6", "6", shifted_key="^"),
+        Key("7", "7", shifted_key="&"),
+        Key("8", "8", shifted_key="*"),
+        Key("9", "9", shifted_key="("),
+        Key("0", "0", shifted_key=")"),
         Key("-", "Hyphen", shifted_key="_"),
         Key("=", "=", shifted_key="+"),
         Key("[", "[", shifted_key="{"),
-        Key("]", "]", shifted_key="]"),
+        Key("]", "]", shifted_key="}"),
         Key("\\", "\\", shifted_key="|"),
         Key(";", ";", shifted_key=":", clarified_name="Semicolon (;)"),
         Key("'", "'", shifted_key='"'),
@@ -242,29 +242,29 @@ class MacOS:
     mods_names = []
     mods_plaintext = []
     mods_unicode = []
+    unshifted_keys = ""
+    shifted_keys = ""
     for _key in keys:
         if _key.modifier:
             mods_names.append(_key.name)
             mods_plaintext.append(_key.ascii)
             mods_unicode.append(_key.key)
+        if _key.shifted_key:
+            unshifted_keys += _key.key
+            shifted_keys += _key.shifted_key
+
+    # make some translation tables
     unicode_plaintext_mods_trans = str.maketrans(
         "".join(mods_unicode), "".join(mods_plaintext)
     )
-
-    # shifted key translations
-    # TODO create these from the keys array
-    unshifted_keys = r",./;'[]\1234567890-="
-    shifted_keys = r'<>?:"{}|!@#$%^&*()_+'
     to_shifted_trans = str.maketrans(unshifted_keys, shifted_keys)
     to_unshifted_trans = str.maketrans(shifted_keys, unshifted_keys)
-
+    # and a keyname dictionary lookup
     keyname_map = {}
     for _key in keys:
         if _key.input_names:
             for _name in _key.input_names:
                 keyname_map[_name] = _key
-
-#    def __init__(self):
 
     @classmethod
     def named_keys(cls, args):
@@ -276,11 +276,11 @@ class MacOS:
         if args.hyper:
             output.append("\t{}".format(cls.hyper_name))
 
-        #output.append("Named Keys:")
-        #output.extend(
+        # output.append("Named Keys:")
+        # output.extend(
         #    map(lambda x: ("\t{}".format(cls._keys[x].name)), cls._keys.keys())
-        #)
-        #output.extend(map(lambda x: ("\t{}".format(x)), cls._fkeys))
+        # )
+        # output.extend(map(lambda x: ("\t{}".format(x)), cls._fkeys))
         return "\n".join(output)
 
     @classmethod
@@ -316,7 +316,7 @@ class MacOS:
         # Only remove hyphens preceeded and followed by non-space character
         # to avoid removing the last hyphen from 'option-shift--' or 'command -'
         text = re.sub(r"(?<=\S)-(?=\S)", " ", text)
-        #TODO fix these to programatically generate the regexs from cls.keys
+        # TODO fix these to programatically generate the regexs from cls.keys
         text = re.sub(r"\b(cont(rol)?|ctl|ctrl)\b", "^", text, re.IGNORECASE)
         text = re.sub(r"\bshift\b", "$", text, re.IGNORECASE)
         text = re.sub(r"\b(opt(ion)?|alt)\b", "~", text, re.IGNORECASE)
@@ -336,6 +336,8 @@ class MacOS:
                 mods.append(char)
             else:
                 key += char
+
+        import ipdb; ipdb.set_trace()
 
         if len(key) == 1:
             if key in cls.shifted_keys:
@@ -364,7 +366,7 @@ class MacOS:
             if key.lower() in cls.keyname_map:
                 # special key names, pgup, etc are in lowercase
                 key = cls.keyname_map[key.lower()].key
-            #elif key.upper() in self._fkeys:
+            # elif key.upper() in self._fkeys:
             #    # but function keys are in uppercase
             #    key = key.upper()
             else:
@@ -376,7 +378,6 @@ class MacOS:
         mods.sort(key=lambda x: cls.mods_plaintext.index(x))
 
         return MacOSKeyboardShortcut("".join(mods), key)
-
 
 
 class MacOSKeyboardShortcut:
@@ -513,6 +514,7 @@ if __name__ == "__main__":
     "inp, parsed",
     [
         ("command %", "$@5"),
+        ("command 2", "@@"),
         ("command shift %", "$@5"),
         ("command shift 5", "$@5"),
         ("shift control 6", "^$6"),
