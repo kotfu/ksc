@@ -252,6 +252,7 @@ class MacOS:
     )
 
     # shifted key translations
+    # TODO create these from the keys array
     unshifted_keys = r",./;'[]\1234567890-="
     shifted_keys = r'<>?:"{}|!@#$%^&*()_+'
     to_shifted_trans = str.maketrans(unshifted_keys, shifted_keys)
@@ -283,7 +284,7 @@ class MacOS:
         return "\n".join(output)
 
     @classmethod
-    def parse_shortcuts(cls, shortcuts, args):
+    def parse_shortcuts(cls, shortcuts):
         """parse a string or array of text into a standard representation of the shortcut
 
         shortcuts = a string of text to be parsed
@@ -294,11 +295,11 @@ class MacOS:
         """
         combos = []
         for combo in re.split(r" [/|] ", shortcuts):
-            combos.append(cls.parse_shortcut(combo, args))
+            combos.append(cls.parse_shortcut(combo))
         return combos
 
     @classmethod
-    def parse_shortcut(cls, text, options):
+    def parse_shortcut(cls, text):
         """parse a string and return a MacOSKeyboardShortcut object
 
         Raises ValueError if string can't be parsed
@@ -374,122 +375,20 @@ class MacOS:
         # sort the mods to be in Apple's recommended order
         mods.sort(key=lambda x: cls.mods_plaintext.index(x))
 
-        return MacOSKeyboardShortcut("".join(mods), key, options)
+        return MacOSKeyboardShortcut("".join(mods), key)
 
 
 
 class MacOSKeyboardShortcut:
-    """Parse, store, and render a keyboard shortcut in the macos flavor
+    """Store and render a keyboard shortcut in the macos flavor
 
-    The canonical representation of a keyboard shortcut is the same as is used in macOS
-    keyboard bindings files, ie:
-
-    * = fn
-    ^ = control
-    $ = shift
-    ~ = option
-    @ = command
-
-    The Hyper key is shorthand for Control-Shift-Option-Command
+    When this object is created, it expects the modifiers, if present, are in the
+    correct order as specified by the Apple Style Guidelines. This occurs in
+    MacOS.parse_shortcut().
 
     """
 
-    # on parsing user input, allow specification of certain keynames
-    # which may be mapped to the associated single character symbol
-    # all names are in lower case
-    # if a keyname is more than one character and not found in this list
-    # then it is not valid
-    _keyname_map = {
-        "esc": "⎋",
-        "escape": "⎋",
-        "tab": "⇥",
-        "caps": "⇪",
-        "capslock": "⇪",
-        "space": "␣",
-        "eject": "⏏",
-        "del": "⌫",
-        "delete": "⌫",
-        "back": "⌫",
-        "backspace": "⌫",
-        "fwddel": "⌦",
-        "fwddelete": "⌦",
-        "return": "↩",
-        "rtn": "↩",
-        "enter": "⌅",
-        "ent": "⌅",
-        "pageup": "⇞",
-        "pgup": "⇞",
-        "pagedown": "⇟",
-        "pgdn": "⇟",
-        "home": "↖",
-        "end": "↘",
-        "left": "←",
-        "leftarrow": "←",
-        "right": "→",
-        "rightarrow": "→",
-        "up": "↑",
-        "uparrow": "↑",
-        "down": "↓",
-        "downarrow": "↓",
-        "click": "leftclick",
-        "leftclick": "leftclick",
-        "rightclick": "rightclick",
-        "rclick": "rightclick",
-    }
-    # programatically create 35 function keys
-    # we choose 35 because that's how many are defined in NSEvent()
-    # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?preferredLanguage=occ
-    _fkeys = []
-    for num in range(1, 36):
-        fkey = "F{}".format(num)
-        _fkeys.append(fkey)
-
-    # - if found in this dictionary, the "key" has an associated html entity,
-    #   friendly name, and/or text description
-    _keys = {
-        "-": Key("-", "Hyphen", "Hyphen"),
-        "⎋": Key("⎋", "Escape", "Escape"),
-        "⇥": Key("⇥", "Tab", "Tab"),
-        "⇪": Key("⇪", "Caps Lock", "Caps Lock"),
-        "␣": Key("␣", "Space", "Space"),
-        "⏏": Key("⏏", "Eject", "Eject??"),
-        "⌫": Key("⌫", "Delete", "Delete"),
-        "⌦": Key("⌦", "Forward Delete", "Forward Delete"),
-        "↩": Key("↩", "Return", "Return"),
-        "⌅": Key("⌅", "Enter", "Enter"),
-        "⇞": Key("⇞", "Page Up", "Page Up"),
-        "⇟": Key("⇟", "Page Down", "Page Down"),
-        "↖": Key("↖", "Home", "Home"),
-        "↘": Key("↘", "End", "End"),
-        "←": Key("←", "Left Arrow", "Left Arrow"),
-        "→": Key("→", "Right Arrow", "Right Arrow"),
-        "↑": Key("↑", "Up Arrow", "Up Arrow"),
-        "↓": Key("↓", "Down Arrow", "Down Arrow"),
-        "leftclick": Key("leftclick", "click", "click"),
-        "rightclick": Key("rightclick", "right click", "right click"),
-    }
-
-    _clarified_keys = {
-        ",": Key(",", "Comma (,)", "Comma (,)"),
-        ".": Key(".", "Period (.)", "Period (.)"),
-        ";": Key(";", "Semicolon (.)", "Semicolon (;)"),
-        ":": Key(":", "Colon (:)", "Colon (:)"),
-        "`": Key("`", "Backtick (`)", "Backtick (`)"),
-        "-": Key("-", "Minus (-)", "Minus (-)"),
-        "+": Key("+", "Plus (+)", "Plus (+)"),
-        "~": Key("~", "Tilde (~)", "Tilde (~)"),
-    }
-
-##    def __init__(self, text, options):
-##        # mods is a string, key is also a string
-##        # if key is alphabetic, it's stored in upper
-##        # case
-##        #
-##        # if hyper is True, parse and output Hyper as a modifier key
-##        self.options = options
-##        self.mods, self.key = self._parse(text)
-##        self.canonical = "".join(self.mods) + self.key
-    def __init__(self, mods, key, options):
+    def __init__(self, mods, key):
         """
         mods is a list of ascii symbols representing key modifiers
         key is the keyname (i.e L, ←, 5 or F12)
@@ -498,7 +397,6 @@ class MacOSKeyboardShortcut:
         self.mods = mods
         self.key = key
         self.canonical = self.mods + self.key
-        self.options = options
 
     def __repr__(self):
         return "KeyboardShortcut({})".format(self.canonical)
@@ -506,38 +404,36 @@ class MacOSKeyboardShortcut:
     def __str__(self):
         return self.canonical
 
-    def render(self):
+    def render(self, options):
         """render this key as a string for human consumption"""
         tokens = []
         joiner = ""
-        if self.options.modifier_symbols:
-            if self.options.plus_sign:
+        if options.modifier_symbols:
+            if options.plus_sign:
                 joiner = "+"
-            tokens.extend(self.mod_symbols)
-        elif self.options.modifier_ascii:
+            tokens.extend(self.mod_symbols())
+        elif options.modifier_ascii:
             joiner = ""
             tokens.extend(self.mods)
         else:
             joiner = "-"
-            tokens.extend(self.mod_names)
-        if self.options.key_symbols:
+            tokens.extend(self.mod_names(options))
+        if options.key_symbols:
             tokens.extend(self.key)
         else:
-            tokens.append(self.key_name)
+            tokens.append(self.key_name(options))
         return joiner.join(tokens)
 
-    @property
-    def mod_names(self):
+    def mod_names(self, options):
         """return a list of modifier names for this shortcut"""
         output = []
-        if self.options.hyper and self.mods == MacOS.hyper_mods:
+        if options.hyper and self.mods == MacOS.hyper_mods:
             output.append(MacOS.hyper_name)
         else:
             for mod in self.mods:
                 output.append(MacOS.mods_names[MacOS.mods_plaintext.index(mod)])
         return output
 
-    @property
     def mod_symbols(self):
         """return a list of unicode symbols for this shortcut"""
         output = []
@@ -545,13 +441,20 @@ class MacOSKeyboardShortcut:
             output.append(MacOS.mods_unicode[MacOS.mods_plaintext.index(mod)])
         return output
 
-    @property
-    def key_name(self):
+    def key_name(self, options):
         """return either the key, or if it has a name return that"""
-        if self.options.clarify_keys and self.key in self._clarified_keys:
-            return self._clarified_keys[self.key].name
-        if self.key in self._keys:
-            return self._keys[self.key].name
+        # find the key object, if it exists
+        keyobj = None
+        for keytest in MacOS.keys:
+            if self.key == keytest.key:
+                keyobj = keytest
+                break
+        # if we have a key object, then use it's name and clarified name
+        if keyobj:
+            if options.clarify_keys and keyobj.clarified_name:
+                return keyobj.clarified_name
+            return keyobj.name
+        # otherwise
         return self.key
 
 
@@ -560,7 +463,7 @@ def _render_txt(combos, args):
     options in args"""
     output = []
     for combo in combos:
-        output.append(combo.render())
+        output.append(combo.render(args))
     return " ".join(output)
 
 
@@ -574,7 +477,7 @@ def main(argv=None):
         print(MacOS.named_keys(args))
         return EXIT_SUCCESS
 
-    combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
+    combos = MacOS.parse_shortcuts(" ".join(args.shortcuts))
     # if args.output == "txt":
     if True:
         print(_render_txt(combos, args))
@@ -607,7 +510,7 @@ if __name__ == "__main__":
 
 
 @pytest.mark.parametrize(
-    "argv, parsed",
+    "inp, parsed",
     [
         ("command %", "$@5"),
         ("command shift %", "$@5"),
@@ -639,18 +542,16 @@ if __name__ == "__main__":
         ("shift ESCAPE", "$⎋"),
         ("control click", "^leftclick"),
         ("option rightclick", "~rightclick"),
-        ("-y hyper 5", "^~$@5"),
+        ("hyper 5", "^~$@5"),
     ],
 )
-def test_mac_parse(argv, parsed):
-    parser = _build_parser()
-    args = parser.parse_args(argv.split())
-    combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
-    assert parsed == combos[0].canonical
+def test_mac_parse(inp, parsed):
+    shortcut = MacOS.parse_shortcut(inp)
+    assert parsed == shortcut.canonical
 
 
 @pytest.mark.parametrize(
-    "argv, out",
+    "cmdline, result",
     [
         ("$@5", "Shift-Command-5"),
         ("-ms $@5", "⇧⌘5"),
@@ -662,13 +563,15 @@ def test_mac_parse(argv, parsed):
         ("^leftclick", "Control-click"),
         ("~rightclick", "Option-right click"),
         ("-c @.", "Command-Period (.)"),
+        ("@⌫", "Command-Delete"),
     ],
 )
-def test_mac_render(argv, out):
-    parser = _build_parser()
-    args = parser.parse_args(argv.split())
-    combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
-    assert out == _render_txt(combos, args)
+def test_mac_render(cmdline, result, capsys):
+    argv = cmdline.split(" ")
+    exit_code = main(argv)
+    out, err = capsys.readouterr()
+    out = out.rstrip()
+    assert out == result
 
 
 # def test_ks_parse():
@@ -717,7 +620,7 @@ def test_ks_parse_error():
     for argv in argvs:
         args = parser.parse_args(argv.split())
         with pytest.raises(ValueError):
-            combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
+            combos = MacOS.parse_shortcuts(" ".join(args.shortcuts))
 
 
 def test_parse_multiple():
@@ -725,9 +628,6 @@ def test_parse_multiple():
         ("F10 / shift-escape / control-option-right", 3),
         ("control x | control c", 2),
     ]
-    parser = _build_parser()
-    for argv, count in parsemap:
-        args = parser.parse_args(argv.split())
-        combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
-
+    for inp, count in parsemap:
+        combos = MacOS.parse_shortcuts(inp)
     assert len(combos) == count
