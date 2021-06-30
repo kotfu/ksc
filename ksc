@@ -3,6 +3,7 @@
 # See https://github.com/kotfu/kbdsc
 
 import argparse
+import collections
 import re
 import sys
 import textwrap
@@ -164,82 +165,217 @@ class Key:
 class MacOS:
     """All the keys and their properties for MacOS"""
 
-    def __init__(self):
-        self.keys = [
-            Key("Fn", "Fn", ["func", "function", "fn"], ascii="*", modifier=True),
-            Key(
-                "⌃",
-                "Control",
-                ["control", "cont", "ctrl", "ctl"],
-                ascii="^",
-                modifier=True,
-            ),
-            Key("⇧", "Shift", ["shift", "shft"], ascii="$", modifier=True),
-            Key("⌥", "Option", ["option", "opt", "alt"], ascii="~", modifier=True),
-            Key("⌘", "Command", ["command", "cmd", "clover"], ascii="@", modifier=True),
-            Key("⎋", "Escape", ["escape", "esc"]),
-            Key("⇥", "Tab", ["tab"]),
-            Key("⇪", "Caps Lock", ["capslock", "caps"]),
-            Key("␣", "Space", ["space"]),
-            Key("⏏", "Eject", ["eject"]),
-            Key("⌫", "Delete", ["delete", "del"]),
-            Key(
-                "⌦",
-                "Forward Delete",
-                ["forwarddelete", "fwddelete", "forwarddel", "fwddel"],
-            ),
-            Key("↩", "Return", ["return", "rtn"]),
-            Key("⌅", "Enter", ["enter", "ent"]),
-            Key("⇞", "Page Up", ["pageup", "pgup"]),
-            Key("⇟", "Page Down", ["pagedown", "pgdown"]),
-            Key("↖", "Home", ["home"]),
-            Key("↘", "End", ["end"]),
-            Key("←", "Left Arrow", ["leftarrow", "left"]),
-            Key("→", "Right Arrow", ["rightarrow", "right"]),
-            Key("↑", "Up Arrow", ["uparrow", "up"]),
-            Key("↓", "Down Arrow", ["downarrow", "down"]),
-            Key("leftclick", "click", ["leftclick", "click"]),
-            Key("rightclick", "right click", ["rightclick", "rclick"]),
-            Key("`", "`", shifted_key="~"),
-            Key("1", "1", shifted_key="!"),
-            Key("2", "2", shifted_key="@"),
-            Key("3", "3", shifted_key="#"),
-            Key("4", "4", shifted_key="$"),
-            Key("5", "5", shifted_key="!"),
-            Key("6", "6", shifted_key="@"),
-            Key("7", "7", shifted_key="#"),
-            Key("8", "8", shifted_key="$"),
-            Key("9", "9", shifted_key="#"),
-            Key("0", "0", shifted_key="$"),
-            Key("-", "Hyphen", shifted_key="_"),
-            Key("=", "=", shifted_key="+"),
-            Key("[", "[", shifted_key="{"),
-            Key("]", "]", shifted_key="]"),
-            Key("\\", "\\", shifted_key="|"),
-            Key(";", ";", shifted_key=":", clarified_name="Semicolon (;)"),
-            Key("'", "'", shifted_key='"'),
-            Key(",", ",", shifted_key="<", clarified_name="Comma (,)"),
-            Key(".", ".", shifted_key=">", clarified_name="Period (.)"),
-            Key("/", "/", shifted_key="?", clarified_name="Slash (.)"),
-        ]
-        # programatically create 35 function keys
-        # we choose 35 because that's how many are defined in NSEvent()
-        # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?preferredLanguage=occ
-        for num in range(1, 36):
-            fkey = "F{}".format(num)
-            self.keys.append(Key(fkey, fkey))
+    keys = [
+        # '*' is not unicode for Fn, but their isn't one, and we need something
+        # that is a single character
+        # order matters for the modifier keys, they need to be in the apple
+        # recommended order for displaying modifier keys
+        Key("*", "Fn", ["func", "function", "fn"], ascii="*", modifier=True),
+        Key(
+            "⌃", # this is not a caret, it's another unicode character
+            "Control",
+            ["control", "cont", "ctrl", "ctl"],
+            ascii="^", # this one is a caret
+            modifier=True,
+        ),
+        Key("⌥", "Option", ["option", "opt", "alt"], ascii="~", modifier=True),
+        Key("⇧", "Shift", ["shift", "shft"], ascii="$", modifier=True),
+        Key("⌘", "Command", ["command", "cmd", "clover"], ascii="@", modifier=True),
+        Key("⎋", "Escape", ["escape", "esc"]),
+        Key("⇥", "Tab", ["tab"]),
+        Key("⇪", "Caps Lock", ["capslock", "caps"]),
+        Key("␣", "Space", ["space"]),
+        Key("⏏", "Eject", ["eject"]),
+        Key("⌫", "Delete", ["delete", "del"]),
+        Key(
+            "⌦",
+            "Forward Delete",
+            ["forwarddelete", "fwddelete", "forwarddel", "fwddel"],
+        ),
+        Key("↩", "Return", ["return", "rtn"]),
+        Key("⌅", "Enter", ["enter", "ent"]),
+        Key("⇞", "Page Up", ["pageup", "pgup"]),
+        Key("⇟", "Page Down", ["pagedown", "pgdown"]),
+        Key("↖", "Home", ["home"]),
+        Key("↘", "End", ["end"]),
+        Key("←", "Left Arrow", ["leftarrow", "left"]),
+        Key("→", "Right Arrow", ["rightarrow", "right"]),
+        Key("↑", "Up Arrow", ["uparrow", "up"]),
+        Key("↓", "Down Arrow", ["downarrow", "down"]),
+        Key("leftclick", "click", ["leftclick", "click"]),
+        Key("rightclick", "right click", ["rightclick", "rclick"]),
+        Key("`", "`", shifted_key="~"),
+        Key("1", "1", shifted_key="!"),
+        Key("2", "2", shifted_key="@"),
+        Key("3", "3", shifted_key="#"),
+        Key("4", "4", shifted_key="$"),
+        Key("5", "5", shifted_key="!"),
+        Key("6", "6", shifted_key="@"),
+        Key("7", "7", shifted_key="#"),
+        Key("8", "8", shifted_key="$"),
+        Key("9", "9", shifted_key="#"),
+        Key("0", "0", shifted_key="$"),
+        Key("-", "Hyphen", shifted_key="_"),
+        Key("=", "=", shifted_key="+"),
+        Key("[", "[", shifted_key="{"),
+        Key("]", "]", shifted_key="]"),
+        Key("\\", "\\", shifted_key="|"),
+        Key(";", ";", shifted_key=":", clarified_name="Semicolon (;)"),
+        Key("'", "'", shifted_key='"'),
+        Key(",", ",", shifted_key="<", clarified_name="Comma (,)"),
+        Key(".", ".", shifted_key=">", clarified_name="Period (.)"),
+        Key("/", "/", shifted_key="?", clarified_name="Slash (.)"),
+    ]
+    # programatically create 35 function keys
+    # we choose 35 because that's how many are defined in NSEvent()
+    # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?preferredLanguage=occ
+    for _num in range(1, 36):
+        _fkey = "F{}".format(_num)
+        keys.append(Key(_fkey, _fkey, [_fkey.lower()]))
 
-    def parse_shortcuts(self, args):
+    #
+    # construct various data structures from keys, which are the authoritative
+    # source
+    hyper_mods = "^~$@"
+    hyper_name = "Hyper"
+
+    mods_names = []
+    mods_plaintext = []
+    mods_unicode = []
+    for _key in keys:
+        if _key.modifier:
+            mods_names.append(_key.name)
+            mods_plaintext.append(_key.ascii)
+            mods_unicode.append(_key.key)
+    unicode_plaintext_mods_trans = str.maketrans(
+        "".join(mods_unicode), "".join(mods_plaintext)
+    )
+
+    # shifted key translations
+    unshifted_keys = r",./;'[]\1234567890-="
+    shifted_keys = r'<>?:"{}|!@#$%^&*()_+'
+    to_shifted_trans = str.maketrans(unshifted_keys, shifted_keys)
+    to_unshifted_trans = str.maketrans(shifted_keys, unshifted_keys)
+
+    keyname_map = {}
+    for _key in keys:
+        if _key.input_names:
+            for _name in _key.input_names:
+                keyname_map[_name] = _key
+
+#    def __init__(self):
+
+    @classmethod
+    def named_keys(cls, args):
+        """Return a string containing a formatted list of all known keys"""
+        # start with the modifiers
+        output = []
+        output.append("Modifiers:")
+        output.extend(map(lambda x: ("\t{}".format(x)), cls.mods_names))
+        if args.hyper:
+            output.append("\t{}".format(cls.hyper_name))
+
+        #output.append("Named Keys:")
+        #output.extend(
+        #    map(lambda x: ("\t{}".format(cls._keys[x].name)), cls._keys.keys())
+        #)
+        #output.extend(map(lambda x: ("\t{}".format(x)), cls._fkeys))
+        return "\n".join(output)
+
+    @classmethod
+    def parse_shortcuts(cls, shortcuts, args):
         """parse a string or array of text into a standard representation of the shortcut
+
+        shortcuts = a string of text to be parsed
 
         uses args from the command line to influence parsing behavior
 
         returns an array of shortcut combinations
         """
         combos = []
-        for combo in re.split(r" [/|] ", " ".join(args.shortcuts)):
-            combos.append(MacOSKeyboardShortcut(combo, args))
+        for combo in re.split(r" [/|] ", shortcuts):
+            combos.append(cls.parse_shortcut(combo, args))
         return combos
+
+    @classmethod
+    def parse_shortcut(cls, text, options):
+        """parse a string and return a MacOSKeyboardShortcut object
+
+        Raises ValueError if string can't be parsed
+
+        """
+
+        """parse input into a canonical non-unicode representation of the shortcut
+
+        letters are always stored as upper case, special key names are always
+        stored as lower case
+        """
+        # save the original text for an error message
+        orig_text = text
+        # Only remove hyphens preceeded and followed by non-space character
+        # to avoid removing the last hyphen from 'option-shift--' or 'command -'
+        text = re.sub(r"(?<=\S)-(?=\S)", " ", text)
+        #TODO fix these to programatically generate the regexs from cls.keys
+        text = re.sub(r"\b(cont(rol)?|ctl|ctrl)\b", "^", text, re.IGNORECASE)
+        text = re.sub(r"\bshift\b", "$", text, re.IGNORECASE)
+        text = re.sub(r"\b(opt(ion)?|alt)\b", "~", text, re.IGNORECASE)
+        text = re.sub(r"\b(comm(and)?|cmd|clover)\b", "@", text, re.IGNORECASE)
+        text = re.sub(r"\b(func(tion)?|fn)\b", "*", text, re.IGNORECASE)
+        text = re.sub(r"\bhyper\b", "^$~@", text, re.IGNORECASE)
+        mods = []
+        key = ""
+        # add other regexes here
+        for char in text.strip():
+            if char == " ":
+                continue
+            elif char in cls.mods_unicode:
+                # translate unicode modifier symbols to their plaintext equivilents
+                mods.append(char.translate(cls.unicode_plaintext_mods_trans))
+            elif char in cls.mods_plaintext:
+                mods.append(char)
+            else:
+                key += char
+
+        if len(key) == 1:
+            if key in cls.shifted_keys:
+                # command % should be command shift 5
+                # and command ? should be command shift ?
+                # these ↓ are the shifted number keys
+                mods.append("$")  # duplicates will get removed later
+                # the unwritten apple rule that shifted numbers are
+                # written as numbers not their symbols
+                if key in "!@#$%^&*()":
+                    key = key.translate(cls.to_unshifted_trans)
+            else:
+                if "$" in mods:
+                    # shift is in the mods, and the key is unshifted
+                    # we should have the shifted symbol unless it is
+                    # a number or letter
+                    # command shift 5 should remain command shift 5
+                    # and command shift r should remain command shift r
+                    if key not in "0123456789":
+                        # but shift command / should be shift command ?
+                        key = key.translate(cls.to_shifted_trans)
+
+            # shortcuts always displayed with upper case letters
+            key = key.upper()
+        else:
+            if key.lower() in cls.keyname_map:
+                # special key names, pgup, etc are in lowercase
+                key = cls.keyname_map[key.lower()].key
+            #elif key.upper() in self._fkeys:
+            #    # but function keys are in uppercase
+            #    key = key.upper()
+            else:
+                raise ValueError("Could not parse '{}'".format(orig_text))
+
+        # remove duplicate modifiers
+        mods = list(set(mods))
+        # sort the mods to be in Apple's recommended order
+        mods.sort(key=lambda x: cls.mods_plaintext.index(x))
+
+        return MacOSKeyboardShortcut("".join(mods), key, options)
+
 
 
 class MacOSKeyboardShortcut:
@@ -257,19 +393,6 @@ class MacOSKeyboardShortcut:
     The Hyper key is shorthand for Control-Shift-Option-Command
 
     """
-
-    _hyper_mods = "^~$@"
-    _hyper_name = "Hyper"
-
-    # * isn't really a unicode version of the modifier, but it's included
-    # here because we map between unicode and plaintext mods
-    # these are in the order apple recommends they be presented
-    _mods_plaintext = ["*", "^", "~", "$", "@"]
-    _mods_unicode = ["*", "⌃", "⌥", "⇧", "⌘"]
-    _mods_names = ["Fn", "Control", "Option", "Shift", "Command"]
-    _unicode_plaintext_mods_trans = str.maketrans(
-        "".join(_mods_unicode), "".join(_mods_plaintext)
-    )
 
     # on parsing user input, allow specification of certain keynames
     # which may be mapped to the associated single character symbol
@@ -356,115 +479,32 @@ class MacOSKeyboardShortcut:
         "+": Key("+", "Plus (+)", "Plus (+)"),
         "~": Key("~", "Tilde (~)", "Tilde (~)"),
     }
-    # shifted key translations
-    _unshifted_keys = r",./;'[]\1234567890-="
-    _shifted_keys = r'<>?:"{}|!@#$%^&*()_+'
-    _to_shifted_trans = str.maketrans(_unshifted_keys, _shifted_keys)
-    _to_unshifted_trans = str.maketrans(_shifted_keys, _unshifted_keys)
 
-    def __init__(self, text, options):
-        # mods is a string, key is also a string
-        # if key is alphabetic, it's stored in upper
-        # case
-        #
-        # if hyper is True, parse and output Hyper as a modifier key
+##    def __init__(self, text, options):
+##        # mods is a string, key is also a string
+##        # if key is alphabetic, it's stored in upper
+##        # case
+##        #
+##        # if hyper is True, parse and output Hyper as a modifier key
+##        self.options = options
+##        self.mods, self.key = self._parse(text)
+##        self.canonical = "".join(self.mods) + self.key
+    def __init__(self, mods, key, options):
+        """
+        mods is a list of ascii symbols representing key modifiers
+        key is the keyname (i.e L, ←, 5 or F12)
+        options are the rendering options to use for this key
+        """
+        self.mods = mods
+        self.key = key
+        self.canonical = self.mods + self.key
         self.options = options
-        self.mods, self.key = self._parse(text)
-        self.canonical = "".join(self.mods) + self.key
 
     def __repr__(self):
         return "KeyboardShortcut({})".format(self.canonical)
 
     def __str__(self):
         return self.canonical
-
-    def _parse(self, text):
-        """parse input into a canonical non-unicode representation of the shortcut
-
-        letters are always stored as upper case, special key names are always
-        stored as lower case
-        """
-        # save the original text for an error message
-        orig_text = text
-        # Only remove hyphens preceeded and followed by non-space character
-        # to avoid removing the last hyphen from 'option-shift--' or 'command -'
-        text = re.sub(r"(?<=\S)-(?=\S)", " ", text)
-        text = re.sub(r"\b(cont(rol)?|ctl|ctrl)\b", "^", text, re.IGNORECASE)
-        text = re.sub(r"\bshift\b", "$", text, re.IGNORECASE)
-        text = re.sub(r"\b(opt(ion)?|alt)\b", "~", text, re.IGNORECASE)
-        text = re.sub(r"\b(comm(and)?|cmd|clover)\b", "@", text, re.IGNORECASE)
-        text = re.sub(r"\b(func(tion)?|fn)\b", "*", text, re.IGNORECASE)
-        text = re.sub(r"\bhyper\b", "^$~@", text, re.IGNORECASE)
-        mods = []
-        key = ""
-        # add other regexes here
-        for char in text.strip():
-            if char == " ":
-                continue
-            elif char in self._mods_unicode:
-                # translate unicode modifier symbols to their plaintext equivilents
-                mods.append(char.translate(self._unicode_plaintext_mods_trans))
-            elif char in self._mods_plaintext:
-                mods.append(char)
-            else:
-                key += char
-
-        if len(key) == 1:
-            if key in self._shifted_keys:
-                # command % should be command shift 5
-                # and command ? should be command shift ?
-                # these ↓ are the shifted number keys
-                mods.append("$")  # duplicates will get removed later
-                # the unwritten apple rule that shifted numbers are
-                # written as numbers not their symbols
-                if key in "!@#$%^&*()":
-                    key = key.translate(self._to_unshifted_trans)
-            else:
-                if "$" in mods:
-                    # shift is in the mods, and the key is unshifted
-                    # we should have the shifted symbol unless it is
-                    # a number or letter
-                    # command shift 5 should remain command shift 5
-                    # and command shift r should remain command shift r
-                    if key not in "0123456789":
-                        # but shift command / should be shift command ?
-                        key = key.translate(self._to_shifted_trans)
-
-            # shortcuts always displayed with upper case letters
-            key = key.upper()
-        else:
-            if key.lower() in self._keyname_map:
-                # special key names, pgup, etc are in lowercase
-                key = self._keyname_map[key.lower()]
-            elif key.upper() in self._fkeys:
-                # but function keys are in uppercase
-                key = key.upper()
-            else:
-                raise ValueError("Could not parse '{}'".format(orig_text))
-
-        # remove duplicate modifiers
-        mods = list(set(mods))
-        # sort the mods to be in Apple's recommended order
-        mods.sort(key=lambda x: self._mods_plaintext.index(x))
-
-        return ("".join(mods), key)
-
-    @classmethod
-    def named_keys(cls, args):
-        """Return a string containing a formatted list of all known keys"""
-        # start with the modifiers
-        output = []
-        output.append("Modifiers:")
-        output.extend(map(lambda x: ("\t{}".format(x)), cls._mods_names))
-        if args.hyper:
-            output.append("\t{}".format(cls._hyper_name))
-
-        output.append("Named Keys:")
-        output.extend(
-            map(lambda x: ("\t{}".format(cls._keys[x].name)), cls._keys.keys())
-        )
-        output.extend(map(lambda x: ("\t{}".format(x)), cls._fkeys))
-        return "\n".join(output)
 
     def render(self):
         """render this key as a string for human consumption"""
@@ -490,11 +530,11 @@ class MacOSKeyboardShortcut:
     def mod_names(self):
         """return a list of modifier names for this shortcut"""
         output = []
-        if self.options.hyper and self.mods == self._hyper_mods:
-            output.append(self._hyper_name)
+        if self.options.hyper and self.mods == MacOS.hyper_mods:
+            output.append(MacOS.hyper_name)
         else:
             for mod in self.mods:
-                output.append(self._mods_names[self._mods_plaintext.index(mod)])
+                output.append(MacOS.mods_names[MacOS.mods_plaintext.index(mod)])
         return output
 
     @property
@@ -502,7 +542,7 @@ class MacOSKeyboardShortcut:
         """return a list of unicode symbols for this shortcut"""
         output = []
         for mod in self.mods:
-            output.append(self._mods_unicode[self._mods_plaintext.index(mod)])
+            output.append(MacOS.mods_unicode[MacOS.mods_plaintext.index(mod)])
         return output
 
     @property
@@ -521,7 +561,6 @@ def _render_txt(combos, args):
     output = []
     for combo in combos:
         output.append(combo.render())
-
     return " ".join(output)
 
 
@@ -532,11 +571,10 @@ def main(argv=None):
 
     if args.list:
         # list all available keys, don't parse any input
-        print(MacOSKeyboardShortcut.named_keys(args))
+        print(MacOS.named_keys(args))
         return EXIT_SUCCESS
 
-    macos = MacOS()
-    combos = macos.parse_shortcuts(args)
+    combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
     # if args.output == "txt":
     if True:
         print(_render_txt(combos, args))
@@ -607,9 +645,7 @@ if __name__ == "__main__":
 def test_mac_parse(argv, parsed):
     parser = _build_parser()
     args = parser.parse_args(argv.split())
-    macos = MacOS()
-    combos = macos.parse_shortcuts(args)
-
+    combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
     assert parsed == combos[0].canonical
 
 
@@ -631,8 +667,7 @@ def test_mac_parse(argv, parsed):
 def test_mac_render(argv, out):
     parser = _build_parser()
     args = parser.parse_args(argv.split())
-    macos = MacOS()
-    combos = macos.parse_shortcuts(args)
+    combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
     assert out == _render_txt(combos, args)
 
 
@@ -681,9 +716,8 @@ def test_ks_parse_error():
     parser = _build_parser()
     for argv in argvs:
         args = parser.parse_args(argv.split())
-        macos = MacOS()
         with pytest.raises(ValueError):
-            combos = macos.parse_shortcuts(args)
+            combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
 
 
 def test_parse_multiple():
@@ -694,7 +728,6 @@ def test_parse_multiple():
     parser = _build_parser()
     for argv, count in parsemap:
         args = parser.parse_args(argv.split())
-        macos = MacOS()
-        combos = macos.parse_shortcuts(args)
+        combos = MacOS.parse_shortcuts(" ".join(args.shortcuts), args)
 
     assert len(combos) == count
