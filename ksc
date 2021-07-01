@@ -218,15 +218,27 @@ class MacOS:
         Key("9", "9", shifted_key="("),
         Key("0", "0", shifted_key=")"),
         Key("-", "-", ["minus"], shifted_key="_", clarified_name="Minus Sign (-)"),
-        Key("_", "_", clarified_name="Underscore (_)"),
+        Key("_", "_", ["underscore"], clarified_name="Underscore (_)"),
         Key("=", "=", ["equals", "equal"], shifted_key="+"),
         Key("+", "+", ["plus"], clarified_name="Plus Sign (+)"),
         Key("[", "[", shifted_key="{"),
         Key("]", "]", shifted_key="}"),
         Key("\\", "\\", ["backslash"], shifted_key="|"),
         Key("|", "|", ["pipe"]),
-        Key(";", ";", ["semicolon", "semi"], shifted_key=":", clarified_name="Semicolon (;)"),
-        Key("'", "'", ["singlequote", "sq"], shifted_key='"', clarified_name="Single Quote (')"),
+        Key(
+            ";",
+            ";",
+            ["semicolon", "semi"],
+            shifted_key=":",
+            clarified_name="Semicolon (;)",
+        ),
+        Key(
+            "'",
+            "'",
+            ["singlequote", "sq"],
+            shifted_key='"',
+            clarified_name="Single Quote (')",
+        ),
         Key('"', '"', ["doublequote", "dq"], clarified_name='Double Quote (")'),
         Key(",", ",", ["comma"], shifted_key="<", clarified_name="Comma (,)"),
         Key(".", ".", ["period"], shifted_key=">", clarified_name="Period (.)"),
@@ -281,17 +293,24 @@ class MacOS:
         """Return a string containing a formatted list of all known keys"""
         # start with the modifiers
         output = []
-        output.append("Modifiers")
+        fmt = "{:12} {:18} {}"
+        output.append(fmt.format("Key", "Name", "Inputs"))
+        output.append(fmt.format("-" * 12, "-" * 18, "-" * 50))
         keyflag = True
         for key in cls.keys:
             if key.modifier is False and keyflag is True:
                 if args.hyper:
-                    output.append("\t{:12} {:12}".format(" ", cls.hyper_name))
-                output.append("Named Keys")
+                    output.append(
+                        fmt.format(" ", cls.hyper_name, cls.hyper_name.lower())
+                    )
                 keyflag = False
             if key.key != key.name or key.clarified_name:
                 output.append(
-                    "\t{:12} {:12}".format(key.key, key.clarified_name or key.name)
+                    fmt.format(
+                        key.key,
+                        key.clarified_name or key.name,
+                        ",".join(key.input_names if key.input_names else ""),
+                    )
                 )
         return "\n".join(output)
 
@@ -482,15 +501,6 @@ class MacOSKeyboardShortcut:
         return self.key
 
 
-def _render_txt(combos, args):
-    """render as plain text a list of keyboard combinations according to the
-    options in args"""
-    output = []
-    for combo in combos:
-        output.append(combo.render(args))
-    return " ".join(output)
-
-
 def main(argv=None):
     """main function"""
     parser = _build_parser()
@@ -572,12 +582,37 @@ def test_mac_parse():
         ("control click", "^leftclick"),
         ("option rightclick", "~rightclick"),
         ("hyper 5", "^~$@5"),
-        ("command dq", "$@\""),
+        ("command dq", '$@"'),
         ("command tilde", "$@~"),
     ]
     for (inp, parsed) in parsemap:
         shortcut = MacOS.parse_shortcut(inp)
         assert parsed == shortcut.canonical
+
+
+def test_mac_parse_error():
+    fails = [
+        "Q99",
+        "F0",
+        "F100",
+        "fred",
+        "command - shift 5",
+        "control ^F",
+        "^$~",
+    ]
+    for inp in fails:
+        with pytest.raises(ValueError):
+            combos = MacOS.parse_shortcuts(inp)
+
+
+def test_mac_parse_multiple():
+    parsemap = [
+        ("F10 / shift-escape / control-option-right", 3),
+        ("control x | control c", 2),
+    ]
+    for inp, count in parsemap:
+        combos = MacOS.parse_shortcuts(inp)
+    assert len(combos) == count
 
 
 def test_mac_render(capsys):
@@ -602,26 +637,16 @@ def test_mac_render(capsys):
         assert out == result
 
 
-def test_ks_parse_error():
-    fails = [
-        "Q99",
-        "F0",
-        "F100",
-        "fred",
-        "command - shift 5",
-        "control ^F",
-        "^$~",
-    ]
-    for inp in fails:
-        with pytest.raises(ValueError):
-            combos = MacOS.parse_shortcuts(inp)
+def test_mac_list(capsys):
+    argv = "-l".split(" ")
+    exit_code = main(argv)
+    out, err = capsys.readouterr()
+    assert not MacOS.hyper_name in out
+    assert "Command" in out
 
 
-def test_parse_multiple():
-    parsemap = [
-        ("F10 / shift-escape / control-option-right", 3),
-        ("control x | control c", 2),
-    ]
-    for inp, count in parsemap:
-        combos = MacOS.parse_shortcuts(inp)
-    assert len(combos) == count
+def test_mac_list_hyper(capsys):
+    argv = "-ly".split(" ")
+    exit_code = main(argv)
+    out, err = capsys.readouterr()
+    assert MacOS.hyper_name in out
