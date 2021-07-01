@@ -127,7 +127,7 @@ class Key:
         shifted_key=None,
         html_entity=None,
         clarified_name=None,
-        ascii=None,
+        ascii_key=None,
         modifier=False,
     ):
         self.key = key
@@ -155,7 +155,7 @@ class Key:
         self.modifier = modifier
         """True if this key is a modifier key, like Fn, Shift, etc."""
 
-        self.ascii = ascii
+        self.ascii_key = ascii_key
         """If the key is a modifier, it also has an ASCII representation, like ~ for Option"""
 
 
@@ -172,17 +172,17 @@ class MacOS:
         # that is a single character
         # order matters for the modifier keys, they need to be in the apple
         # recommended order for displaying modifier keys
-        Key("*", "Fn", ["func", "function", "fn"], ascii="*", modifier=True),
+        Key("*", "Fn", ["func", "function", "fn"], ascii_key="*", modifier=True),
         Key(
             "⌃",  # this is not a caret, it's another unicode character
             "Control",
             ["control", "cont", "ctrl", "ctl"],
-            ascii="^",  # this one is a caret
+            ascii_key="^",  # this one is a caret
             modifier=True,
         ),
-        Key("⌥", "Option", ["option", "opt", "alt"], ascii="~", modifier=True),
-        Key("⇧", "Shift", ["shift", "shft"], ascii="$", modifier=True),
-        Key("⌘", "Command", ["command", "cmd", "clover"], ascii="@", modifier=True),
+        Key("⌥", "Option", ["option", "opt", "alt"], ascii_key="~", modifier=True),
+        Key("⇧", "Shift", ["shift", "shft"], ascii_key="$", modifier=True),
+        Key("⌘", "Command", ["command", "cmd", "clover"], ascii_key="@", modifier=True),
         Key("⎋", "Escape", ["escape", "esc"]),
         Key("⇥", "Tab", ["tab"]),
         Key("⇪", "Caps Lock", ["capslock", "caps"]),
@@ -276,10 +276,10 @@ class MacOS:
     for _key in keys:
         if _key.modifier:
             mods_names.append(_key.name)
-            mods_plaintext.append(_key.ascii)
+            mods_plaintext.append(_key.ascii_key)
             mods_unicode.append(_key.key)
             _regex = r"\b(" + "|".join(_key.input_names) + r")\b"
-            mods_regex_map.append((_key.ascii, _regex))
+            mods_regex_map.append((_key.ascii_key, _regex))
         if _key.shifted_key:
             unshifted_keys += _key.key
             shifted_keys += _key.shifted_key
@@ -346,11 +346,6 @@ class MacOS:
 
         """
 
-        """parse input into a canonical non-unicode representation of the shortcut
-
-        letters are always stored as upper case, special key names are always
-        stored as lower case
-        """
         # save the original text for an error message
         orig_text = text
         mods = []
@@ -611,7 +606,7 @@ def test_mac_parse_error():
     ]
     for inp in fails:
         with pytest.raises(ValueError):
-            combos = MacOS.parse_shortcuts(inp)
+            _ = MacOS.parse_shortcuts(inp)
 
 
 def test_mac_parse_multiple():
@@ -641,21 +636,24 @@ def test_mac_render(capsys):
     for (cmdline, result) in rendermap:
         argv = cmdline.split(" ")
         exit_code = main(argv)
-        out, err = capsys.readouterr()
+        out, _ = capsys.readouterr()
         out = out.rstrip()
         assert out == result
+        assert exit_code == EXIT_SUCCESS
 
 
 def test_mac_list(capsys):
     argv = "-l".split(" ")
     exit_code = main(argv)
-    out, err = capsys.readouterr()
+    out, _ = capsys.readouterr()
     assert not MacOS.hyper_name in out
     assert "Command" in out
+    assert exit_code == EXIT_SUCCESS
 
 
 def test_mac_list_hyper(capsys):
     argv = "-ly".split(" ")
     exit_code = main(argv)
-    out, err = capsys.readouterr()
+    out, _ = capsys.readouterr()
     assert MacOS.hyper_name in out
+    assert exit_code == EXIT_SUCCESS
