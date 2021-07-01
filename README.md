@@ -42,6 +42,8 @@ it. Here's some examples:
     Command-B
     $ ksc shift F2
     Shift-F2
+    $ ksc fn f10
+    Fn-F10
     $ ksc command-option-rightarrow
     Option-Command-Right Arrow
     $ ksc command shift %
@@ -52,17 +54,22 @@ it. Here's some examples:
     Shift-Command-P
 
 
-Sequences of multiple keystrokes can be entered by separating them with a " / " or " |
-" (yes the surrounding spaces are required). This syntax was chosen because it's
-faster to enter `command shift F` than `command-shift-F`, and sequences of multiple
-shortcuts are pretty rare.
+Sequences of multiple keyboard shortcuts can be entered by separating them with a " /"
+or " | " (the surrounding spaces are required).
 
     $ ksc control x / control c
     Control-X Control-C
 
-Note that you can also enter keyboard shortcuts using unicode symbols or ASCII symbols
-representing the modifiers. The ASCII symbols are the same as those used by Apple in
-the [Cocoa Text System Key Bindings](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/TextDefaultsBindings/TextDefaultsBindings.html).
+If you have a sequence of multiple keyboard shortcuts and the first one has a slash,
+you can clarify the shortcut by joining the elements of the shortcut wiht a `-`:
+
+    $ ksc command-/ / control-f
+    Command-/ Control-F
+
+In addition to friendly modifier names, you can also enter keyboard shortcuts using
+unicode symbols or ASCII symbols representing the modifiers. The ASCII symbols are
+the same as those used by Apple in the
+[Cocoa Text System Key Bindings](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/TextDefaultsBindings/TextDefaultsBindings.html).
 
 | Modifier   | Unicode | ASCII |
 |------------|:-------:|:-----:|
@@ -76,7 +83,7 @@ the help command line option:
 
     $ ksc -h
 
-Note that the output is standardized according to Apple's Style Guidelines (see
+The output is standardized according to Apple's Style Guidelines (see
 below), including names of modifiers, keys, capitalization, interpretation of shifted
 symbols and characters, and sequence of modifiers if there are more than one.
 

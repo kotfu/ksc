@@ -35,6 +35,8 @@ def _build_parser():
         Separate multiple shortcuts with ' / ':
 
             control x / control c
+
+        See https://github.com/kotfu/ksc for more info
         """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
