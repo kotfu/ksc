@@ -62,8 +62,7 @@ shortcuts are pretty rare.
 
 Note that you can also enter keyboard shortcuts using unicode symbols or ASCII symbols
 representing the modifiers. The ASCII symbols are the same as those used by Apple in
-the [Cocoa Text System Key Bindings]
-(https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/TextDefaultsBindings/TextDefaultsBindings.html).
+the [Cocoa Text System Key Bindings](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/TextDefaultsBindings/TextDefaultsBindings.html).
 
 | Modifier   | Unicode | ASCII |
 |------------|:-------:|:-----:|
