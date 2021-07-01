@@ -9,8 +9,8 @@ Inspired by and adapted from Brett Terpstra's
 
 Here's a few examples:
 
-    $ ksc command shift 5
-    Shift-Command-5
+    $ ksc -ms -p command shift 5
+    ⇧+⌘+5
     $ ksc -y hyper t
     Hyper-T
     $ ksc control +
@@ -21,10 +21,11 @@ Here's a few examples:
 
 ## Installation
 
-You'll need Python 3 on your system. Download `ksc` and put it in your path.
+You'll need Python 3 on your system. Download
+[ksc](https://github.com/kotfu/ksc/blob/main/ksc) and put it in your path.
 
 
-## Commmand Line Usage
+## Specifying Keyboard Shortcuts
 
 The simplest invocation of this program has some description of the keyboard shortcut
 as the arguments. Many variations of input are accepted. Capitalization is not
@@ -54,14 +55,14 @@ it. Here's some examples:
     Shift-Command-P
 
 
-Sequences of multiple keyboard shortcuts can be entered by separating them with a " /"
-or " | " (the surrounding spaces are required).
+Sequences of multiple keyboard shortcuts can be entered by separating them with a ` / `
+or ` | ` (the spaces surrounding the slash or the pipe are required).
 
     $ ksc control x / control c
     Control-X Control-C
 
 If you have a sequence of multiple keyboard shortcuts and the first one has a slash,
-you can clarify the shortcut by joining the elements of the shortcut wiht a `-`:
+you can clarify the shortcut by joining the elements of the shortcut with a `-`:
 
     $ ksc command-/ / control-f
     Command-/ Control-F
@@ -78,10 +79,16 @@ the same as those used by Apple in the
 | Shift      |   `⇧`   |  `$`  |
 | Command    |   `⌘`   |  `@`  |
 
-There are several command line options available. You can see a brief summary by using
-the help command line option:
+
+## Getting Help
+
+You are currently reading the help for this program. You can see a brief summary by
+using the help command line option:
 
     $ ksc -h
+
+
+## Customizing Output
 
 The output is standardized according to Apple's Style Guidelines (see
 below), including names of modifiers, keys, capitalization, interpretation of shifted
@@ -122,6 +129,14 @@ the difference when you use `-c`:
     Command-Period (.)
 
 
+## Show Me The Keys
+
+The alpha-numeric keys like `T` and `8` are easily known and understood. However, you may
+not know all the names and symbols for the other keys. You can get a list with:
+
+    $ ksc -l
+
+
 ## The Hyper Key
 
 Using [Karabiner Elements](https://karabiner-elements.pqrs.org/) or
@@ -148,17 +163,23 @@ your output when it's appropriate:
 
       $ ksc -k home | pbcopy
 
-* Because the tilde character `~` can mean both the `Option` key as well as `Shift-Backtick`, the
+* Because the tilde character `~` can mean both the `Option` key as well as `Shift-Grave`, the
   following input is ambiguous:
 
-      $ ksc $@~
+      $ ksc '$@~'
 
-  It could either mean `Shift-Command-~`, which is valid, or `Shift-Command-Option`, which is not,
-  therefore this input causes a parsing error. You can clarify by spelling out the modifier keys
-  and including the `shift` as a modifier, which makes the program assume that the `~` is the key
-  you want, not a modifier. You can also use the key name:
+  Note the single quotes to protect all those special characters from being
+  interpreted by your shell. This could either mean `Shift-Command-~`, which is valid,
+  or `Shift-Command-Option`, which is not, therefore this input causes a parsing
+  error. You can clarify by using:
 
-      $ ksc shift command tilde
+      $ ksc command tilde
+      Shift-Command-~
+
+  or:
+
+      $ ksc -c shift command grave
+      Shift-Command-Tilde (~)
 
 
 ## Apple Style

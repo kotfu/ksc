@@ -193,6 +193,7 @@ class MacOS:
             "Forward Delete",
             ["forwarddelete", "fwddelete", "forwarddel", "fwddel"],
         ),
+        Key("⌧", "Clear", ["clear"], clarified_name="Clear (⌧)"),
         Key("↩", "Return", ["return", "rtn"]),
         Key("⌅", "Enter", ["enter", "ent"]),
         Key("⇞", "Page Up", ["pageup", "pgup"]),
@@ -205,7 +206,13 @@ class MacOS:
         Key("↓", "Down Arrow", ["downarrow", "down"]),
         Key("leftclick", "click", ["leftclick", "click"]),
         Key("rightclick", "right click", ["rightclick", "rclick"]),
-        Key("`", "`", ["grave"], shifted_key="~", clarified_name="Grave (`)"),
+        Key(
+            "`",
+            "`",
+            ["grave", "backtick", "backquote"],
+            shifted_key="~",
+            clarified_name="Grave (`)",
+        ),
         Key("~", "~", ["tilde"], clarified_name="Tilde (~)"),
         Key("1", "1", shifted_key="!"),
         Key("2", "2", shifted_key="@"),
@@ -243,6 +250,7 @@ class MacOS:
         Key(",", ",", ["comma"], shifted_key="<", clarified_name="Comma (,)"),
         Key(".", ".", ["period"], shifted_key=">", clarified_name="Period (.)"),
         Key("/", "/", ["slash"], shifted_key="?", clarified_name="Slash (.)"),
+        Key("?", "?", ["questionmark", "question"]),
     ]
     # programatically create 35 function keys
     # we choose 35 because that's how many are defined in NSEvent()
@@ -304,7 +312,7 @@ class MacOS:
                         fmt.format(" ", cls.hyper_name, cls.hyper_name.lower())
                     )
                 keyflag = False
-            if key.key != key.name or key.clarified_name:
+            if key.key != key.name or key.clarified_name or key.input_names:
                 output.append(
                     fmt.format(
                         key.key,
