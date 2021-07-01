@@ -137,6 +137,19 @@ not know all the names and symbols for the other keys. You can get a list with:
     $ ksc -l
 
 
+## Keyboard Maestro
+
+I have created a simple [Keyboard Maestro](https://www.keyboardmaestro.com/) macro
+which allows you to use `ksc` anywhere you can type on your Mac. I set a typed input trigger
+so when I type `;ksc`, Keyboard Maestro prompts me for input. I type in the keyboard shortcut
+I want, and Keyboard Maestro runs the script, captures the output, and then types the output
+where my cursor is.
+
+[![Keyboard Maestro Macro for Keyboard Shortcut](/keyboard-maestro-macro.jpg)](/Keyboard%20Shortcut.kmmacros)
+
+Download the [Keyboard Shortcut macro](/Keyboard%20Shortcut.kmmacros) for Keyboard Maestro.
+
+
 ## The Hyper Key
 
 Using [Karabiner Elements](https://karabiner-elements.pqrs.org/) or
