@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# See https://github.com/kotfu/kbdsc
+# See https://github.com/kotfu/ksc
 
 import argparse
 import collections
@@ -8,15 +8,9 @@ import re
 import sys
 import textwrap
 
-# Features to be added
-# - add a -t=mac, win option
-# -
-
-# to be removed later
-import pytest
 
 # constants
-VERSION_STRING = "0.1.0"
+VERSION_STRING = "1.0.0"
 EXIT_SUCCESS = 0
 EXIT_ERROR = 1
 EXIT_USAGE = 2
@@ -97,6 +91,8 @@ def _build_parser():
         action="store_true",
         help="list all modifier and key names",
     )
+    # potential future options, here for planning
+    #
     # parser.add_argument(
     #     "-o",
     #     "--output",
@@ -120,7 +116,7 @@ def _build_parser():
 
 
 class Key:
-    """store the name of a key, the html rendering of it, and a friendly text render of it"""
+    """store the name of a key, input names, ane render names for that key"""
 
     def __init__(
         self,
@@ -165,7 +161,10 @@ class Key:
 # make a list of keys, if the key isn't in this list (like F or R), then
 # it's just a single character key with nothing special about it
 class MacOS:
-    """All the keys and their properties for MacOS"""
+    """The keys and their properties for MacOS
+
+    Includes methods to parse user input into shortcuts
+    """
 
     keys = [
         # '*' is not unicode for Fn, but their isn't one, and we need something
@@ -206,7 +205,8 @@ class MacOS:
         Key("↓", "Down Arrow", ["downarrow", "down"]),
         Key("leftclick", "click", ["leftclick", "click"]),
         Key("rightclick", "right click", ["rightclick", "rclick"]),
-        Key("`", "`", shifted_key="~"),
+        Key("`", "`", ["grave"], shifted_key="~", clarified_name="Grave (`)"),
+        Key("~", "~", ["tilde"], clarified_name="Tilde (~)"),
         Key("1", "1", shifted_key="!"),
         Key("2", "2", shifted_key="@"),
         Key("3", "3", shifted_key="#"),
@@ -217,16 +217,19 @@ class MacOS:
         Key("8", "8", shifted_key="*"),
         Key("9", "9", shifted_key="("),
         Key("0", "0", shifted_key=")"),
-        Key("-", "Hyphen", shifted_key="_"),
-        Key("=", "=", shifted_key="+"),
+        Key("-", "-", ["minus"], shifted_key="_", clarified_name="Minus Sign (-)"),
+        Key("=", "=", ["equals", "equal"], shifted_key="+"),
+        Key("+", "+", ["plus"], clarified_name="Plus Sign (+)"),
         Key("[", "[", shifted_key="{"),
         Key("]", "]", shifted_key="}"),
-        Key("\\", "\\", shifted_key="|"),
-        Key(";", ";", shifted_key=":", clarified_name="Semicolon (;)"),
-        Key("'", "'", shifted_key='"'),
-        Key(",", ",", shifted_key="<", clarified_name="Comma (,)"),
-        Key(".", ".", shifted_key=">", clarified_name="Period (.)"),
-        Key("/", "/", shifted_key="?", clarified_name="Slash (.)"),
+        Key("\\", "\\", ["backslash"], shifted_key="|"),
+        Key("|", "|", ["pipe"]),
+        Key(";", ";", ["semicolon", "semi"], shifted_key=":", clarified_name="Semicolon (;)"),
+        Key("'", "'", ["singlequote", "sq"], shifted_key='"', clarified_name="Single Quote (')"),
+        Key('"', '"', ["doublequote", "dq"], clarified_name='Double Quote (")'),
+        Key(",", ",", ["comma"], shifted_key="<", clarified_name="Comma (,)"),
+        Key(".", ".", ["period"], shifted_key=">", clarified_name="Period (.)"),
+        Key("/", "/", ["slash"], shifted_key="?", clarified_name="Slash (.)"),
     ]
     # programatically create 35 function keys
     # we choose 35 because that's how many are defined in NSEvent()
@@ -277,16 +280,18 @@ class MacOS:
         """Return a string containing a formatted list of all known keys"""
         # start with the modifiers
         output = []
-        output.append("Modifiers:")
-        output.extend(map(lambda x: ("\t{}".format(x)), cls.mods_names))
-        if args.hyper:
-            output.append("\t{}".format(cls.hyper_name))
-
-        # output.append("Named Keys:")
-        # output.extend(
-        #    map(lambda x: ("\t{}".format(cls._keys[x].name)), cls._keys.keys())
-        # )
-        # output.extend(map(lambda x: ("\t{}".format(x)), cls._fkeys))
+        output.append("Modifiers")
+        keyflag = True
+        for key in cls.keys:
+            if key.modifier is False and keyflag is True:
+                if args.hyper:
+                    output.append("\t{:12} {:12}".format(" ", cls.hyper_name))
+                output.append("Named Keys")
+                keyflag = False
+            if key.key != key.name or key.clarified_name:
+                output.append(
+                    "\t{:12} {:12}".format(key.key, key.clarified_name or key.name)
+                )
         return "\n".join(output)
 
     @classmethod
@@ -330,7 +335,7 @@ class MacOS:
             (text, cnt) = re.subn(regex, "", text, re.IGNORECASE)
             if cnt:
                 mods.append(modkey)
-        # do the hyper key
+        # look for the hyper key
         (text, cnt) = re.subn(cls.hyper_regex, "", text, re.IGNORECASE)
         if cnt:
             for modkey in cls.hyper_mods:
@@ -351,6 +356,11 @@ class MacOS:
                 mods.append(char)
             else:
                 key += char
+
+        # map key names to key symbols
+        if key.lower() in cls.keyname_map:
+            # special key names, pgup, etc are in lowercase
+            key = cls.keyname_map[key.lower()].key
 
         if len(key) == 1:
             if key in cls.shifted_keys:
@@ -377,11 +387,10 @@ class MacOS:
             key = key.upper()
         else:
             if key.lower() in cls.keyname_map:
-                # special key names, pgup, etc are in lowercase
-                key = cls.keyname_map[key.lower()].key
-            # elif key.upper() in self._fkeys:
-            #    # but function keys are in uppercase
-            #    key = key.upper()
+                # these are the function keys because they are in the map
+                # and the key name is longer than a single character
+                # either way, if the key is in the map then it's valid
+                pass
             else:
                 raise ValueError("Could not parse '{}'".format(orig_text))
 
@@ -506,26 +515,25 @@ if __name__ == "__main__":
 #
 # embedded tests
 #
-# to run the test simply do
+# pytest will only collect tests in files that end in .py
+# to run the tests do
 #
-#   $ pytest kbdsc.py
+#   $ ln -s ksc ksc.py
+#   $ pytest ksc.py
 #
 # you can't use pytest decorators with this method, but you also don't
-# import pytest and mock unless you run the tests. Tradeoffs. If you want
+# import pytest unless you run the tests. Tradeoffs. If you want
 # to use decorators, move the imports in setup_module() to the top and then
 # delete that function
 
 
-# def setup_module():
-#    global pytest
-#    global mock
-#    import pytest
-#    import mock
+def setup_module():
+    global pytest
+    import pytest
 
 
-@pytest.mark.parametrize(
-    "inp, parsed",
-    [
+def test_mac_parse():
+    parsemap = [
         ("command 2", "@2"),
         ("command shift 2", "$@2"),
         ("command %", "$@5"),
@@ -559,16 +567,16 @@ if __name__ == "__main__":
         ("control click", "^leftclick"),
         ("option rightclick", "~rightclick"),
         ("hyper 5", "^~$@5"),
-    ],
-)
-def test_mac_parse(inp, parsed):
-    shortcut = MacOS.parse_shortcut(inp)
-    assert parsed == shortcut.canonical
+        ("command dq", "$@\""),
+        ("command tilde", "$@~"),
+    ]
+    for (inp, parsed) in parsemap:
+        shortcut = MacOS.parse_shortcut(inp)
+        assert parsed == shortcut.canonical
 
 
-@pytest.mark.parametrize(
-    "cmdline, result",
-    [
+def test_mac_render(capsys):
+    rendermap = [
         ("$@5", "Shift-Command-5"),
         ("-ms $@5", "⇧⌘5"),
         ("-ms -p $@5", "⇧+⌘+5"),
@@ -580,63 +588,26 @@ def test_mac_parse(inp, parsed):
         ("~rightclick", "Option-right click"),
         ("-c @.", "Command-Period (.)"),
         ("@⌫", "Command-Delete"),
-    ],
-)
-def test_mac_render(cmdline, result, capsys):
-    argv = cmdline.split(" ")
-    exit_code = main(argv)
-    out, err = capsys.readouterr()
-    out = out.rstrip()
-    assert out == result
-
-
-# def test_ks_parse():
-#     parsemap = [
-#         ("command %", "$@5"),
-#         ("command shift %", "$@5"),
-#         ("command shift 5", "$@5"),
-#         ("shift-command-/", "@?"),
-#         ("command ?", "@?"),
-#         ("command f", "@F"),
-#         ("command option r", "~@R"),
-#         ("⌘⌥⇧⌃r", "^~$@R"),
-#         ("command-shift-f", "$@F"),
-#         ("func 2", "*2"),
-#         ("command shift /", "@?"),
-#         ("control command  shift control H", "^$@H"),
-#         ("  command -", "@-"),
-#         ("command command q", "@Q"),
-#         ("shift control \\", "^|"),
-#         ("H", "H"),
-#         ("shift h", "$H"),
-#         ("command control R", "^@R"),
-#         ("shift p", "$P"),
-#         ("shift 4", "$"),
-#         ("ctrl 6", "^6"),
-#         ("shift control 6", "^$^"),
-#         ("command right", "@→"),
-#         ("control command del", "^@⌫"),
-#         ("shift ESCAPE", "$⎋"),
-#         ("F7", "f7"),
-#     ]
-#     for text, canonical in parsemap:
-#         ks = KeyboardShortcut(text)
-#         assert str(ks) == canonical
+    ]
+    for (cmdline, result) in rendermap:
+        argv = cmdline.split(" ")
+        exit_code = main(argv)
+        out, err = capsys.readouterr()
+        out = out.rstrip()
+        assert out == result
 
 
 def test_ks_parse_error():
-    argvs = [
+    fails = [
         "Q99",
         "F0",
         "F100",
         "fred",
         "command - shift 5",
     ]
-    parser = _build_parser()
-    for argv in argvs:
-        args = parser.parse_args(argv.split())
+    for inp in fails:
         with pytest.raises(ValueError):
-            combos = MacOS.parse_shortcuts(" ".join(args.shortcuts))
+            combos = MacOS.parse_shortcuts(inp)
 
 
 def test_parse_multiple():
