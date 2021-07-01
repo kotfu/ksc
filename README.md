@@ -51,9 +51,6 @@ it. Here's some examples:
     $ ksc ⇧⌘P
     Shift-Command-P
 
-Note that the output is standardized according to Apple's Style Guidelines (see
-below), including names of modifiers, keys, capitalization, interpretation of shifted
-symbols and characters, and sequence of modifiers if there are more than one.
 
 Sequences of multiple keystrokes can be entered by separating them with a " / " or " |
 " (yes the surrounding spaces are required). This syntax was chosen because it's
@@ -63,10 +60,26 @@ shortcuts are pretty rare.
     $ ksc control x / control c
     Control-X Control-C
 
+Note that you can also enter keyboard shortcuts using unicode symbols or ASCII symbols
+representing the modifiers. The ASCII symbols are the same as those used by Apple in
+the [Cocoa Text System Key Bindings]
+(https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/TextDefaultsBindings/TextDefaultsBindings.html).
+
+| Modifier   | Unicode | ASCII |
+|------------|:-------:|:-----:|
+| Control    |   `⌃`   |  `^`  |
+| Option     |   `⌥`   |  `~`  |
+| Shift      |   `⇧`   |  `$`  |
+| Command    |   `⌘`   |  `@`  |
+
 There are several command line options available. You can see a brief summary by using
 the help command line option:
 
     $ ksc -h
+
+Note that the output is standardized according to Apple's Style Guidelines (see
+below), including names of modifiers, keys, capitalization, interpretation of shifted
+symbols and characters, and sequence of modifiers if there are more than one.
 
 There are several command line options to modify the output. The `-ms` or
 `--modifier-symbols` options output the modifers as unicode symbols:
