@@ -148,6 +148,18 @@ your output when it's appropriate:
 
       $ ksc -k home | pbcopy
 
+* Because the tilde character `~` can mean both the `Option` key as well as `Shift-Backtick`, the
+  following input is ambiguous:
+
+      $ ksc $@~
+
+  It could either mean `Shift-Command-~`, which is valid, or `Shift-Command-Option`, which is not,
+  therefore this input causes a parsing error. You can clarify by spelling out the modifier keys
+  and including the `shift` as a modifier, which makes the program assume that the `~` is the key
+  you want, not a modifier. You can also use the key name:
+
+      $ ksc shift command tilde
+
 
 ## Apple Style
 

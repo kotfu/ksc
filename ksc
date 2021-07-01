@@ -218,6 +218,7 @@ class MacOS:
         Key("9", "9", shifted_key="("),
         Key("0", "0", shifted_key=")"),
         Key("-", "-", ["minus"], shifted_key="_", clarified_name="Minus Sign (-)"),
+        Key("_", "_", clarified_name="Underscore (_)"),
         Key("=", "=", ["equals", "equal"], shifted_key="+"),
         Key("+", "+", ["plus"], clarified_name="Plus Sign (+)"),
         Key("[", "[", shifted_key="{"),
@@ -501,11 +502,11 @@ def main(argv=None):
         return EXIT_SUCCESS
 
     combos = MacOS.parse_shortcuts(" ".join(args.shortcuts))
-    # if args.output == "txt":
-    if True:
-        print(_render_txt(combos, args))
-    elif args.output == "html":
-        pass
+    output = []
+    for combo in combos:
+        output.append(combo.render(args))
+    print(" ".join(output))
+    return EXIT_SUCCESS
 
 
 if __name__ == "__main__":
@@ -535,15 +536,19 @@ def setup_module():
 def test_mac_parse():
     parsemap = [
         ("command 2", "@2"),
+        ("@2", "@2"),
         ("command shift 2", "$@2"),
         ("command %", "$@5"),
         ("command shift %", "$@5"),
         ("command shift 5", "$@5"),
         ("shift control 6", "^$6"),
+        ("^$6", "^$6"),
         ("shift-command-/", "$@?"),
         ("command shift /", "$@?"),
         ("shift control \\", "^$|"),
         ("control \\", "^\\"),
+        ("control shift `", "^$~"),
+        ("^$`", "^$~"),
         ("command ?", "$@?"),
         ("command f", "@F"),
         ("command option r", "~@R"),
@@ -604,6 +609,8 @@ def test_ks_parse_error():
         "F100",
         "fred",
         "command - shift 5",
+        "control ^F",
+        "^$~",
     ]
     for inp in fails:
         with pytest.raises(ValueError):
