@@ -152,14 +152,14 @@ Download the [Keyboard Shortcut macro](/Keyboard%20Shortcut.kmmacros) for Keyboa
 
 ## Alfred
 
-If you use [Alfred](https://www.alfredapp.com/), I have created a
+If you use [Alfred](https://www.alfredapp.com/), there is a
 [Keyboard Shortcut workflow](/Keyboard%20Shortcut.alfredworkflow) which uses
 the command line program. The workflow includes a snippet trigger of `ksc`.
 If your snippet prefix is `//`, then you can type `//ksc` and Alfred will
 prompt you for input, where you can type the text representation of a keyboard
 shortcut. Alfred will paste the standardized version at the location of the cursor.
 
-Download the [Keyboard Shortcut workflow](/Keyboard%20Shortcut.alfredworkflow)
+Download the [Keyboard Shortcut workflow](/Keyboard%20Shortcut.alfredworkflow) for Alfred.
 
 
 ## The Hyper Key
