@@ -416,7 +416,7 @@ class MacOS:
                 # either way, if the key is in the map then it's valid
                 pass
             else:
-                raise ValueError("Could not parse '{}'".format(orig_text))
+                raise ValueError("error parsing '{}'".format(orig_text))
 
         # remove duplicate modifiers
         mods = list(set(mods))
@@ -515,7 +515,12 @@ def main(argv=None):
         print(MacOS.named_keys(args))
         return EXIT_SUCCESS
 
-    combos = MacOS.parse_shortcuts(" ".join(args.shortcuts))
+    try:
+        combos = MacOS.parse_shortcuts(" ".join(args.shortcuts))
+    except ValueError as err:
+        print("{}: {}".format(parser.prog, err), file=sys.stderr)
+        return EXIT_ERROR
+
     output = []
     for combo in combos:
         output.append(combo.render(args))
