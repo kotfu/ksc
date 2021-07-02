@@ -145,9 +145,21 @@ so when I type `;ksc`, Keyboard Maestro prompts me for input. I type in the keyb
 I want, and Keyboard Maestro runs the script, captures the output, and then types the output
 where my cursor is.
 
-[![Keyboard Maestro Macro for Keyboard Shortcut](/keyboard-maestro-macro.jpg)](/Keyboard%20Shortcut.kmmacros)
+[![Keyboard Maestro Macro for Keyboard Shortcut](/gfx/keyboard-maestro-macro.jpg)](/Keyboard%20Shortcut.kmmacros)
 
 Download the [Keyboard Shortcut macro](/Keyboard%20Shortcut.kmmacros) for Keyboard Maestro.
+
+
+## Alfred
+
+If you use [Alfred](https://www.alfredapp.com/), I have created a
+[Keyboard Shortcut workflow](/Keyboard%20Shortcut.alfredworkflow) which uses
+the command line program. The workflow includes a snippet trigger of `ksc`.
+If your snippet prefix is `//`, then you can type `//ksc` and Alfred will
+prompt you for input, where you can type the text representation of a keyboard
+shortcut. Alfred will paste the standardized version at the location of the cursor.
+
+Download the [Keyboard Shortcut workflow](/Keyboard%20Shortcut.alfredworkflow)
 
 
 ## The Hyper Key
