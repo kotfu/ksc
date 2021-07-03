@@ -111,6 +111,7 @@ def _build_parser():
         action="store_true",
         help="list all modifier and key names",
     )
+
     # potential future options, here for planning
     #
     # parser.add_argument(
@@ -144,6 +145,15 @@ def main(argv=None):
         # list all available keys, don't parse any input
         print(ksc.MacOS.named_keys(args))
         return EXIT_SUCCESS
+    else:
+        if not args.shortcuts:
+            print(
+                "{}: error: the following arguments are required: shortcuts".format(
+                    parser.prog
+                ),
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
 
     try:
         combos = ksc.MacOS.parse_shortcuts(" ".join(args.shortcuts))
