@@ -28,7 +28,7 @@ Classes to represent MacOS keys and shortcuts
 import re
 
 
-class Key:
+class MacOSKey:
     """store the name of a key, input names, ane render names for that key"""
 
     def __init__(
@@ -84,93 +84,93 @@ class MacOS:
         # that is a single character
         # order matters for the modifier keys, they need to be in the apple
         # recommended order for displaying modifier keys
-        Key("*", "Fn", ["func", "function", "fn"], ascii_key="*", modifier=True),
-        Key(
+        MacOSKey("*", "Fn", ["func", "function", "fn"], ascii_key="*", modifier=True),
+        MacOSKey(
             "⌃",  # this is not a caret, it's another unicode character
             "Control",
             ["control", "cont", "ctrl", "ctl"],
             ascii_key="^",  # this one is a caret
             modifier=True,
         ),
-        Key("⌥", "Option", ["option", "opt", "alt"], ascii_key="~", modifier=True),
-        Key("⇧", "Shift", ["shift", "shft"], ascii_key="$", modifier=True),
-        Key("⌘", "Command", ["command", "cmd", "clover"], ascii_key="@", modifier=True),
-        Key("⎋", "Escape", ["escape", "esc"]),
-        Key("⇥", "Tab", ["tab"]),
-        Key("⇪", "Caps Lock", ["capslock", "caps"]),
-        Key("␣", "Space", ["space"]),
-        Key("⏏", "Eject", ["eject"]),
-        Key("⌫", "Delete", ["delete", "del"]),
-        Key(
+        MacOSKey("⌥", "Option", ["option", "opt", "alt"], ascii_key="~", modifier=True),
+        MacOSKey("⇧", "Shift", ["shift", "shft"], ascii_key="$", modifier=True),
+        MacOSKey("⌘", "Command", ["command", "cmd", "clover"], ascii_key="@", modifier=True),
+        MacOSKey("⎋", "Escape", ["escape", "esc"]),
+        MacOSKey("⇥", "Tab", ["tab"]),
+        MacOSKey("⇪", "Caps Lock", ["capslock", "caps"]),
+        MacOSKey("␣", "Space", ["space"]),
+        MacOSKey("⏏", "Eject", ["eject"]),
+        MacOSKey("⌫", "Delete", ["delete", "del"]),
+        MacOSKey(
             "⌦",
             "Forward Delete",
             ["forwarddelete", "fwddelete", "forwarddel", "fwddel"],
         ),
-        Key("⌧", "Clear", ["clear"], clarified_name="Clear (⌧)"),
-        Key("↩", "Return", ["return", "rtn"]),
-        Key("⌅", "Enter", ["enter", "ent"]),
-        Key("⇞", "Page Up", ["pageup", "pgup"]),
-        Key("⇟", "Page Down", ["pagedown", "pgdown"]),
-        Key("↖", "Home", ["home"]),
-        Key("↘", "End", ["end"]),
-        Key("←", "Left Arrow", ["leftarrow", "left"]),
-        Key("→", "Right Arrow", ["rightarrow", "right"]),
-        Key("↑", "Up Arrow", ["uparrow", "up"]),
-        Key("↓", "Down Arrow", ["downarrow", "down"]),
-        Key("leftclick", "click", ["leftclick", "click"]),
-        Key("rightclick", "right click", ["rightclick", "rclick"]),
-        Key(
+        MacOSKey("⌧", "Clear", ["clear"], clarified_name="Clear (⌧)"),
+        MacOSKey("↩", "Return", ["return", "rtn"]),
+        MacOSKey("⌅", "Enter", ["enter", "ent"]),
+        MacOSKey("⇞", "Page Up", ["pageup", "pgup"]),
+        MacOSKey("⇟", "Page Down", ["pagedown", "pgdown"]),
+        MacOSKey("↖", "Home", ["home"]),
+        MacOSKey("↘", "End", ["end"]),
+        MacOSKey("←", "Left Arrow", ["leftarrow", "left"]),
+        MacOSKey("→", "Right Arrow", ["rightarrow", "right"]),
+        MacOSKey("↑", "Up Arrow", ["uparrow", "up"]),
+        MacOSKey("↓", "Down Arrow", ["downarrow", "down"]),
+        MacOSKey("leftclick", "click", ["leftclick", "click"]),
+        MacOSKey("rightclick", "right click", ["rightclick", "rclick"]),
+        MacOSKey(
             "`",
             "`",
             ["grave", "backtick", "backquote"],
             shifted_key="~",
             clarified_name="Grave (`)",
         ),
-        Key("~", "~", ["tilde"], clarified_name="Tilde (~)"),
-        Key("1", "1", shifted_key="!"),
-        Key("2", "2", shifted_key="@"),
-        Key("3", "3", shifted_key="#"),
-        Key("4", "4", shifted_key="$"),
-        Key("5", "5", shifted_key="%"),
-        Key("6", "6", shifted_key="^"),
-        Key("7", "7", shifted_key="&"),
-        Key("8", "8", shifted_key="*"),
-        Key("9", "9", shifted_key="("),
-        Key("0", "0", shifted_key=")"),
-        Key("-", "-", ["minus"], shifted_key="_", clarified_name="Minus Sign (-)"),
-        Key("_", "_", ["underscore"], clarified_name="Underscore (_)"),
-        Key("=", "=", ["equals", "equal"], shifted_key="+"),
-        Key("+", "+", ["plus"], clarified_name="Plus Sign (+)"),
-        Key("[", "[", shifted_key="{"),
-        Key("]", "]", shifted_key="}"),
-        Key("\\", "\\", ["backslash"], shifted_key="|"),
-        Key("|", "|", ["pipe"]),
-        Key(
+        MacOSKey("~", "~", ["tilde"], clarified_name="Tilde (~)"),
+        MacOSKey("1", "1", shifted_key="!"),
+        MacOSKey("2", "2", shifted_key="@"),
+        MacOSKey("3", "3", shifted_key="#"),
+        MacOSKey("4", "4", shifted_key="$"),
+        MacOSKey("5", "5", shifted_key="%"),
+        MacOSKey("6", "6", shifted_key="^"),
+        MacOSKey("7", "7", shifted_key="&"),
+        MacOSKey("8", "8", shifted_key="*"),
+        MacOSKey("9", "9", shifted_key="("),
+        MacOSKey("0", "0", shifted_key=")"),
+        MacOSKey("-", "-", ["minus"], shifted_key="_", clarified_name="Minus Sign (-)"),
+        MacOSKey("_", "_", ["underscore"], clarified_name="Underscore (_)"),
+        MacOSKey("=", "=", ["equals", "equal"], shifted_key="+"),
+        MacOSKey("+", "+", ["plus"], clarified_name="Plus Sign (+)"),
+        MacOSKey("[", "[", shifted_key="{"),
+        MacOSKey("]", "]", shifted_key="}"),
+        MacOSKey("\\", "\\", ["backslash"], shifted_key="|"),
+        MacOSKey("|", "|", ["pipe"]),
+        MacOSKey(
             ";",
             ";",
             ["semicolon", "semi"],
             shifted_key=":",
             clarified_name="Semicolon (;)",
         ),
-        Key(
+        MacOSKey(
             "'",
             "'",
             ["singlequote", "sq"],
             shifted_key='"',
             clarified_name="Single Quote (')",
         ),
-        Key('"', '"', ["doublequote", "dq"], clarified_name='Double Quote (")'),
-        Key(",", ",", ["comma"], shifted_key="<", clarified_name="Comma (,)"),
-        Key(".", ".", ["period"], shifted_key=">", clarified_name="Period (.)"),
-        Key("/", "/", ["slash"], shifted_key="?", clarified_name="Slash (.)"),
-        Key("?", "?", ["questionmark", "question"]),
+        MacOSKey('"', '"', ["doublequote", "dq"], clarified_name='Double Quote (")'),
+        MacOSKey(",", ",", ["comma"], shifted_key="<", clarified_name="Comma (,)"),
+        MacOSKey(".", ".", ["period"], shifted_key=">", clarified_name="Period (.)"),
+        MacOSKey("/", "/", ["slash"], shifted_key="?", clarified_name="Slash (.)"),
+        MacOSKey("?", "?", ["questionmark", "question"]),
     ]
     # programatically create 35 function keys
     # we choose 35 because that's how many are defined in NSEvent()
     # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?preferredLanguage=occ
     for _num in range(1, 36):
         _fkey = "F{}".format(_num)
-        keys.append(Key(_fkey, _fkey, [_fkey.lower()]))
+        keys.append(MacOSKey(_fkey, _fkey, [_fkey.lower()]))
 
     #
     # construct various data structures from keys, which are the authoritative
