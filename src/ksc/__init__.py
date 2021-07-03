@@ -34,8 +34,8 @@ except ImportError:  # pragma: nocover
     import importlib_metadata
 
 from .macos import (
-    MacOSKey,
     MacOS,
+    MacOSKey,
     MacOSKeyboardShortcut,
 )
 
