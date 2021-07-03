@@ -1,119 +1,31 @@
-#!/usr/bin/env python3
 #
-# Copyright (c) 2021 kotfu
-# Distributed under the MIT License
-# See https://github.com/kotfu/ksc
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2021 Jared Crapo
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+"""
+Classes to represent MacOS keys and shortcuts
+"""
 
-import argparse
 import re
-import sys
-import textwrap
-
-
-# constants
-VERSION_STRING = "1.0.0"
-EXIT_SUCCESS = 0
-EXIT_ERROR = 1
-EXIT_USAGE = 2
-
-
-def _build_parser():
-    """build an arg parser with all the proper parameters"""
-    desc = "Create a standardized representation of a MacOS keyboard shortcut."
-    epilog = """\
-        Keyboard shortcuts can be entered in many ways:
-
-            command shift F
-            option command h
-            control option command space
-
-        Separate multiple shortcuts with ' / ' or ' | ':
-
-            control x / control c
-
-        See https://github.com/kotfu/ksc for more info
-        """
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=desc,
-        epilog=textwrap.dedent(epilog),
-    )
-    parser.add_argument("shortcuts", nargs="*", help="keyboard shortcuts")
-
-    parser.add_argument(
-        "-v",
-        "--version",
-        action="version",
-        version=VERSION_STRING,
-        help="show the version information and exit",
-    )
-    mod_group = parser.add_mutually_exclusive_group()
-    mod_group.add_argument(
-        "-ma",
-        "--modifier-ascii",
-        action="store_true",
-        help="output modifiers as ASCII characters instead of modifier names",
-    )
-    mod_group.add_argument(
-        "-ms",
-        "--modifier-symbols",
-        action="store_true",
-        help="output modifier symbols instead of modifier names",
-    )
-    parser.add_argument(
-        "-p",
-        "--plus-sign",
-        action="store_true",
-        help="output + between modifier symbols, only used if -ms",
-    )
-    parser.add_argument(
-        "-y",
-        "--hyper",
-        action="store_true",
-        help="output Hyper as a modifier name",
-    )
-
-    parser.add_argument(
-        "-k",
-        "--key-symbols",
-        action="store_true",
-        help="output key symbols instead of key names",
-    )
-    parser.add_argument(
-        "-c",
-        "--clarify-keys",
-        action="store_true",
-        help="clarify hard to read keys by spelling out their name, ignored if -k",
-    )
-
-    parser.add_argument(
-        "-l",
-        "--list",
-        action="store_true",
-        help="list all modifier and key names",
-    )
-    # potential future options, here for planning
-    #
-    # parser.add_argument(
-    #     "-o",
-    #     "--output",
-    #     choices=["txt", "html", "json"],
-    #     default="txt",
-    #     help="output format",
-    # )
-    # parser.add_argument(
-    #     "-s",
-    #     "--style",
-    #     choices=["mac", "win"],
-    #     default="mac",
-    #     help="style of shortcut based on operating system",
-    # )
-    # parser.add_argument(
-    #     "-t",
-    #     "--template",
-    #     help="tempate to use for html output",
-    # )
-    return parser
 
 
 class Key:
@@ -503,162 +415,3 @@ class MacOSKeyboardShortcut:
             return keyobj.name
         # otherwise
         return self.key
-
-
-def main(argv=None):
-    """main function"""
-    parser = _build_parser()
-    args = parser.parse_args(argv)
-
-    if args.list:
-        # list all available keys, don't parse any input
-        print(MacOS.named_keys(args))
-        return EXIT_SUCCESS
-
-    try:
-        combos = MacOS.parse_shortcuts(" ".join(args.shortcuts))
-    except ValueError as err:
-        print("{}: {}".format(parser.prog, err), file=sys.stderr)
-        return EXIT_ERROR
-
-    output = []
-    for combo in combos:
-        output.append(combo.render(args))
-    print(" ".join(output))
-    return EXIT_SUCCESS
-
-
-if __name__ == "__main__":
-    sys.exit(main())
-
-
-#
-# embedded tests
-#
-# pytest will only collect tests in files that end in .py
-# to run the tests do
-#
-#   $ ln -s ksc ksc.py
-#   $ pytest ksc.py
-#
-# you can't use pytest decorators with this method, but you also don't
-# import pytest unless you run the tests. Tradeoffs. If you want
-# to use decorators, move the imports in setup_module() to the top and then
-# delete that function
-
-
-def setup_module():
-    global pytest
-    import pytest
-
-
-def test_mac_parse():
-    parsemap = [
-        ("command 2", "@2"),
-        ("@2", "@2"),
-        ("command shift 2", "$@2"),
-        ("command %", "$@5"),
-        ("command shift %", "$@5"),
-        ("command shift 5", "$@5"),
-        ("shift control 6", "^$6"),
-        ("^$6", "^$6"),
-        ("shift-command-/", "$@?"),
-        ("command shift /", "$@?"),
-        ("shift control \\", "^$|"),
-        ("control \\", "^\\"),
-        ("control shift `", "^$~"),
-        ("^$`", "^$~"),
-        ("command ?", "$@?"),
-        ("command f", "@F"),
-        ("command option r", "~@R"),
-        ("⌘⌥⇧⌃r", "^~$@R"),
-        ("command-shift-f", "$@F"),
-        ("func f2", "*F2"),
-        ("fn F13", "*F13"),
-        ("F7", "F7"),
-        ("control command  shift control H", "^$@H"),
-        ("  command -", "@-"),
-        ("command command q", "@Q"),
-        ("H", "H"),
-        ("shift h", "$H"),
-        ("command control R", "^@R"),
-        ("shift p", "$P"),
-        ("shift 4", "$4"),
-        ("ctrl 6", "^6"),
-        ("command right", "@→"),
-        ("control command del", "^@⌫"),
-        ("shift ESCAPE", "$⎋"),
-        ("control click", "^leftclick"),
-        ("option rightclick", "~rightclick"),
-        ("hyper 5", "^~$@5"),
-        ("command dq", '$@"'),
-        ("command tilde", "$@~"),
-    ]
-    for (inp, parsed) in parsemap:
-        shortcut = MacOS.parse_shortcut(inp)
-        assert parsed == shortcut.canonical
-
-
-def test_mac_parse_error():
-    fails = [
-        "Q99",
-        "F0",
-        "F100",
-        "fred",
-        "command - shift 5",
-        "control ^F",
-        "^$~",
-    ]
-    for inp in fails:
-        with pytest.raises(ValueError):
-            _ = MacOS.parse_shortcuts(inp)
-
-
-def test_mac_parse_multiple():
-    parsemap = [
-        ("F10 / shift-escape / control-option-right", 3),
-        ("control x | control c", 2),
-    ]
-    for inp, count in parsemap:
-        combos = MacOS.parse_shortcuts(inp)
-    assert len(combos) == count
-
-
-def test_mac_render(capsys):
-    rendermap = [
-        ("$@5", "Shift-Command-5"),
-        ("-ms $@5", "⇧⌘5"),
-        ("-ms -p $@5", "⇧+⌘+5"),
-        ("^~$@R", "Control-Option-Shift-Command-R"),
-        ("-y ^~$@R", "Hyper-R"),
-        ("-y hyper 5", "Hyper-5"),
-        ("-yp -ms hyper 5", "⌃+⌥+⇧+⌘+5"),
-        ("^leftclick", "Control-click"),
-        ("~rightclick", "Option-right click"),
-        ("-c @.", "Command-Period (.)"),
-        ("@⌫", "Command-Delete"),
-    ]
-    for (cmdline, result) in rendermap:
-        argv = cmdline.split(" ")
-        exit_code = main(argv)
-        out, _ = capsys.readouterr()
-        out = out.rstrip()
-        assert out == result
-        assert exit_code == EXIT_SUCCESS
-
-
-def test_mac_list(capsys):
-    argv = "-l".split(" ")
-    exit_code = main(argv)
-    out, _ = capsys.readouterr()
-    assert not MacOS.hyper_name in out
-    assert "Command" in out
-    assert exit_code == EXIT_SUCCESS
-
-
-def test_mac_list_hyper(capsys):
-    argv = "-ly".split(" ")
-    exit_code = main(argv)
-    out, _ = capsys.readouterr()
-    assert MacOS.hyper_name in out
-    assert exit_code == EXIT_SUCCESS
