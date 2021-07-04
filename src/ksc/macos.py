@@ -94,7 +94,9 @@ class MacOS:
         ),
         MacOSKey("⌥", "Option", ["option", "opt", "alt"], ascii_key="~", modifier=True),
         MacOSKey("⇧", "Shift", ["shift", "shft"], ascii_key="$", modifier=True),
-        MacOSKey("⌘", "Command", ["command", "cmd", "clover"], ascii_key="@", modifier=True),
+        MacOSKey(
+            "⌘", "Command", ["command", "cmd", "clover"], ascii_key="@", modifier=True
+        ),
         MacOSKey("⎋", "Escape", ["escape", "esc"]),
         MacOSKey("⇥", "Tab", ["tab"]),
         MacOSKey("⇪", "Caps Lock", ["capslock", "caps"]),
