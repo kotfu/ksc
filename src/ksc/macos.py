@@ -31,6 +31,8 @@ import re
 class MacOSKey:
     """store the name of a key, input names, ane render names for that key"""
 
+    # pylint: disable=too-many-instance-attributes, too-few-public-methods
+
     def __init__(
         self,
         key,
@@ -42,6 +44,7 @@ class MacOSKey:
         ascii_key=None,
         modifier=False,
     ):
+        # pylint: disable=too-many-arguments)
         self.key = key
         """The (usually) single character representation of the key. For modifiers and
         most other named keys, we use the unicode representation, i.e. ⌘ for command,
@@ -259,6 +262,7 @@ class MacOS:
         Raises ValueError if string can't be parsed
 
         """
+        # pylint: disable=too-many-branches
 
         # save the original text for an error message
         orig_text = text
@@ -336,7 +340,7 @@ class MacOS:
         # remove duplicate modifiers
         mods = list(set(mods))
         # sort the mods to be in Apple's recommended order
-        mods.sort(key=lambda x: cls.mods_plaintext.index(x))
+        mods.sort(key=cls.mods_plaintext.index)
 
         return MacOSKeyboardShortcut("".join(mods), key)
 
@@ -361,9 +365,11 @@ class MacOSKeyboardShortcut:
         self.canonical = self.mods + self.key
 
     def __repr__(self):
+        """custom repr"""
         return "MacOSKeyboardShortcut('{}')".format(self.canonical)
 
     def __str__(self):
+        """custom string representation"""
         return self.canonical
 
     def render(self, options):
