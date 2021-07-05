@@ -168,5 +168,5 @@ def main(argv=None):
     return EXIT_SUCCESS
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: nocover
     sys.exit(main())

@@ -360,7 +360,7 @@ class MacOSKeyboardShortcut:
         self.canonical = self.mods + self.key
 
     def __repr__(self):
-        return "KeyboardShortcut({})".format(self.canonical)
+        return "MacOSKeyboardShortcut('{}')".format(self.canonical)
 
     def __str__(self):
         return self.canonical

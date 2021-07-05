@@ -119,6 +119,8 @@ def test_mac_parse_multiple(inp, count):
         ("-y ^~$@R", "Hyper-R"),
         ("-y hyper 5", "Hyper-5"),
         ("-yp -ms hyper 5", "⌃+⌥+⇧+⌘+5"),
+        ("-ma hyper 5", "^~$@5"),
+        ("-ms -k command esc", "⌘⎋"),
         ("^leftclick", "Control-click"),
         ("~rightclick", "Option-right click"),
         ("-c @.", "Command-Period (.)"),
@@ -149,3 +151,8 @@ def test_mac_list_hyper(capsys):
     out, _ = capsys.readouterr()
     assert ksc.MacOS.hyper_name in out
     assert exit_code == EXIT_SUCCESS
+
+def test_keyboard_shortcut_dunders():
+    combo = ksc.MacOS.parse_shortcut("opt command v")
+    assert combo.__repr__() == "MacOSKeyboardShortcut('{}')".format("~@V")
+    assert combo.__str__() == "~@V"
