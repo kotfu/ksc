@@ -28,8 +28,6 @@ import ksc
 from ksc.__main__ import (
     main,
     EXIT_SUCCESS,
-    EXIT_ERROR,
-    EXIT_USAGE,
 )
 
 
@@ -151,6 +149,7 @@ def test_mac_list_hyper(capsys):
     out, _ = capsys.readouterr()
     assert ksc.MacOS.hyper_name in out
     assert exit_code == EXIT_SUCCESS
+
 
 def test_keyboard_shortcut_dunders():
     combo = ksc.MacOS.parse_shortcut("opt command v")

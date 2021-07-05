@@ -22,13 +22,13 @@
 # THE SOFTWARE.
 #
 
-import ksc
+
 from ksc.__main__ import (
     main,
-    EXIT_SUCCESS,
     EXIT_ERROR,
     EXIT_USAGE,
 )
+
 
 def test_mac_list(capsys):
     argv = []
@@ -37,6 +37,7 @@ def test_mac_list(capsys):
     assert err
     assert not out
     assert exit_code == EXIT_USAGE
+
 
 def test_mac_parse_err(capsys):
     argv = "command //".split(" ")

@@ -169,7 +169,7 @@ class MacOS:
     ]
     # programatically create 35 function keys
     # we choose 35 because that's how many are defined in NSEvent()
-    # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?preferredLanguage=occ
+    # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes
     for _num in range(1, 36):
         _fkey = "F{}".format(_num)
         keys.append(MacOSKey(_fkey, _fkey, [_fkey.lower()]))
@@ -283,7 +283,8 @@ class MacOS:
         for char in text.strip():
             if char == " ":
                 continue
-            elif char in cls.mods_unicode:
+
+            if char in cls.mods_unicode:
                 # translate unicode modifier symbols to their plaintext equivilents
                 mods.append(char.translate(cls.unicode_plaintext_mods_trans))
             elif char in cls.mods_plaintext and char not in mods:

@@ -61,7 +61,7 @@ namespace_clean.add_task(pytest_clean, "pytest")
 @invoke.task
 def pylint(context):
     "Check code quality using pylint"
-    context.run("pylint src/tomcatmanager tests", echo=True)
+    context.run("pylint src/ksc tests", echo=True)
 
 
 namespace.add_task(pylint)
@@ -133,7 +133,7 @@ namespace_clean.add_task(docs_clean, name="docs")
 @invoke.task
 def livehtml(context):
     "Launch webserver on http://localhost:8000 with rendered documentation"
-    watch = "--watch src/tomcatmanager --watch tests --watch ."
+    watch = "--watch src/ksc --watch tests --watch ."
     builder = "html"
     outputdir = os.path.join(DOCS_BUILDDIR, builder)
     cmdline = "sphinx-autobuild -b {} {} {} {}".format(
