@@ -21,8 +21,9 @@ Here's a few examples:
 
 ## Installation
 
-You'll need Python 3 on your system. Download
-[ksc](https://github.com/kotfu/ksc/blob/main/ksc) and put it in your path.
+You'll need Python 3. Install with pip:
+
+    $ pip install ksc
 
 
 ## Specifying Keyboard Shortcuts
