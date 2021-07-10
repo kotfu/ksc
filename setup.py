@@ -19,6 +19,7 @@ setup(
     use_scm_version=True,
     description="A command line tool and python library for documenting keyboard shortcuts.",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Jared Crapo",
     author_email="jared@kotfu.net",
     url="https://github.com/kotfu/ksc",
