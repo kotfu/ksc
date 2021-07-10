@@ -71,7 +71,7 @@ namespace_check.add_task(pylint)
 @invoke.task
 def black_check(context):
     """Check if code is properly formatted using black"""
-    context.run("black --check *.py tests src docs", echo=True)
+    context.run("black --check *.py tests src", echo=True)
 
 
 namespace.add_task(black_check)
@@ -80,69 +80,11 @@ namespace.add_task(black_check)
 @invoke.task
 def black(context):
     """Format code using black"""
-    context.run("black *.py tests src docs", echo=True)
+    context.run("black *.py tests src", echo=True)
 
 
 namespace.add_task(black)
 namespace_check.add_task(black)
-
-#####
-#
-# documentation
-#
-#####
-DOCS_SRCDIR = "docs"
-DOCS_ADDITIONAL = "README.rst CONTRIBUTING.rst CHANGELOG.rst"
-DOCS_BUILDDIR = os.path.join("docs", "build")
-SPHINX_OPTS = "-nvWT"  # Be nitpicky, verbose, and treat warnings as errors
-
-
-@invoke.task()
-def docs(context, builder="html"):
-    "Build documentation using sphinx"
-    cmdline = "python -msphinx -M {} {} {} {}".format(
-        builder, DOCS_SRCDIR, DOCS_BUILDDIR, SPHINX_OPTS
-    )
-    context.run(cmdline, echo=True)
-
-
-namespace.add_task(docs)
-namespace_check.add_task(docs)
-
-
-@invoke.task()
-def doc8(context):
-    "Check documentation with doc8"
-    context.run("doc8 {} {}".format(DOCS_SRCDIR, DOCS_ADDITIONAL), echo=True)
-
-
-namespace.add_task(doc8)
-namespace_check.add_task(doc8)
-
-
-@invoke.task
-def docs_clean(context):
-    "Remove rendered documentation"
-    # pylint: disable=unused-argument
-    rmrf(DOCS_BUILDDIR)
-
-
-namespace_clean.add_task(docs_clean, name="docs")
-
-
-@invoke.task
-def livehtml(context):
-    "Launch webserver on http://localhost:8000 with rendered documentation"
-    watch = "--watch src/ksc --watch tests --watch ."
-    builder = "html"
-    outputdir = os.path.join(DOCS_BUILDDIR, builder)
-    cmdline = "sphinx-autobuild -b {} {} {} {}".format(
-        builder, DOCS_SRCDIR, outputdir, watch
-    )
-    context.run(cmdline, echo=True, pty=True)
-
-
-namespace.add_task(livehtml)
 
 
 #####
