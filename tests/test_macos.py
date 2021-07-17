@@ -33,51 +33,54 @@ from ksc.__main__ import (
 )
 
 
-def test_mac_parse():
-    parsemap = [
-        ("command 2", "@2"),
-        ("@2", "@2"),
-        ("command shift 2", "$@2"),
-        ("command %", "$@5"),
-        ("command shift %", "$@5"),
-        ("command shift 5", "$@5"),
-        ("shift control 6", "^$6"),
-        ("^$6", "^$6"),
-        ("shift-command-/", "$@?"),
-        ("command shift /", "$@?"),
-        ("shift control \\", "^$|"),
-        ("control \\", "^\\"),
-        ("control shift `", "^$~"),
-        ("^$`", "^$~"),
-        ("command ?", "$@?"),
-        ("command f", "@F"),
-        ("command option r", "~@R"),
-        ("⌘⌥⇧⌃r", "^~$@R"),
-        ("command-shift-f", "$@F"),
-        ("func f2", "*F2"),
-        ("fn F13", "*F13"),
+@pytest.mark.parametrize(
+    "inp, parsed",
+    [
+        ("command 2", "Command-2"),
+        ("@2", "Command-2"),
+        ("command shift 2", "Shift-Command-2"),
+        ("command %", "Shift-Command-5"),
+        ("command shift %", "Shift-Command-5"),
+        ("command shift 5", "Shift-Command-5"),
+        ("shift control 6", "Control-Shift-6"),
+        ("^$6", "Control-Shift-6"),
+        ("shift-command-/", "Shift-Command-?"),
+        ("command shift /", "Shift-Command-?"),
+        ("command ?", "Shift-Command-?"),
+        ("shift control \\", "Control-Shift-|"),
+        ("control \\", "Control-\\"),
+        ("control shift `", "Control-Shift-~"),
+        ("command tilde", "Shift-Command-~"),
+        ("^$`", "Control-Shift-~"),
+        ("command f", "Command-F"),
+        ("command-shift-f", "Shift-Command-F"),
+        ("command option r", "Option-Command-R"),
+        ("command control R", "Control-Command-R"),
+        ("⌘⌥⇧⌃r", "Control-Option-Shift-Command-R"),
+        ("control command  shift control H", "Control-Shift-Command-H"),
+        ("func f2", "Fn-F2"),
+        ("fn F13", "Fn-F13"),
         ("F7", "F7"),
-        ("control command  shift control H", "^$@H"),
-        ("  command -", "@-"),
-        ("command command q", "@Q"),
+        ("  command -", "Command--"),
+        ("command command q", "Command-Q"),
         ("H", "H"),
-        ("shift h", "$H"),
-        ("command control R", "^@R"),
-        ("shift p", "$P"),
-        ("shift 4", "$4"),
-        ("ctrl 6", "^6"),
-        ("command right", "@→"),
-        ("control command del", "^@⌫"),
-        ("shift ESCAPE", "$⎋"),
-        ("control click", "^leftclick"),
-        ("option rightclick", "~rightclick"),
-        ("hyper 5", "^~$@5"),
-        ("command dq", '$@"'),
-        ("command tilde", "$@~"),
-    ]
-    for (inp, parsed) in parsemap:
-        shortcut = ksc.MacOS.parse_shortcut(inp)
-        assert parsed == shortcut.canonical
+        ("shift h", "Shift-H"),
+        ("shift p", "Shift-P"),
+        ("shift 4", "Shift-4"),
+        ("ctrl 6", "Control-6"),
+        ("command right", "Command-Right Arrow"),
+        ("control command del", "Control-Command-Delete"),
+        ("shift ESCAPE", "Shift-Escape"),
+        ("control click", "Control-click"),
+        ("control leftclick", "Control-click"),
+        ("option rightclick", "Option-right click"),
+        ("hyper 5", "Control-Option-Shift-Command-5"),
+        ("command dq", 'Shift-Command-"'),
+    ],
+)
+def test_mac_parse(inp, parsed):
+    shortcut = ksc.MacOS.parse_shortcut(inp)
+    assert parsed == str(shortcut)
 
 
 @pytest.mark.parametrize(
@@ -155,5 +158,5 @@ def test_mac_list_hyper(capsys):
 
 def test_keyboard_shortcut_dunders():
     combo = ksc.MacOS.parse_shortcut("opt command v")
-    assert combo.__repr__() == "MacOSKeyboardShortcut('{}')".format("~@V")
-    assert combo.__str__() == "~@V"
+    assert combo.__repr__() == "MacOSKeyboardShortcut('{}')".format("Option-Command-V")
+    assert combo.__str__() == "Option-Command-V"

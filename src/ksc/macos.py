@@ -25,6 +25,7 @@
 Classes to represent MacOS keys and shortcuts
 """
 
+import collections
 import re
 
 
@@ -177,42 +178,51 @@ class MacOS:
         _fkey = "F{}".format(_num)
         keys.append(MacOSKey(_fkey, _fkey, [_fkey.lower()]))
 
-    #
-    # construct various data structures from keys, which are the authoritative
-    # source
-    hyper_mods = "^~$@"
-    hyper_name = "Hyper"
-    hyper_regex = r"\b" + hyper_name.lower() + r"\b"
-
-    mods_names = []
-    mods_plaintext = []
-    mods_unicode = []
-    unshifted_keys = ""
-    shifted_keys = ""
-    mods_regex_map = []
+    # modifiers is a subset of keys
+    modifiers = []
     for _key in keys:
         if _key.modifier:
-            mods_names.append(_key.name)
-            mods_plaintext.append(_key.ascii_key)
-            mods_unicode.append(_key.key)
-            _regex = r"\b(" + "|".join(_key.input_names) + r")\b"
-            mods_regex_map.append((_key.ascii_key, _regex))
-        if _key.shifted_key:
-            unshifted_keys += _key.key
-            shifted_keys += _key.shifted_key
+            modifiers.append(_key)
 
-    # make some translation tables
-    unicode_plaintext_mods_trans = str.maketrans(
-        "".join(mods_unicode), "".join(mods_plaintext)
-    )
-    to_shifted_trans = str.maketrans(unshifted_keys, shifted_keys)
-    to_unshifted_trans = str.maketrans(shifted_keys, unshifted_keys)
-    # and a keyname dictionary lookup
+    # build a keyname dictionary lookup
     keyname_map = {}
     for _key in keys:
         if _key.input_names:
             for _name in _key.input_names:
                 keyname_map[_name] = _key
+
+    #
+    # construct various data structures from keys, which are the authoritative
+    # source
+
+    # the hyper key is a wierd because its a combination of other keys, so we have to
+    # handle it separately
+    hyper_mods = []
+    hyper_mods.append(keyname_map["control"])
+    hyper_mods.append(keyname_map["option"])
+    hyper_mods.append(keyname_map["shift"])
+    hyper_mods.append(keyname_map["command"])
+    hyper_name = "Hyper"
+    hyper_regex = r"\b" + hyper_name.lower() + r"\b"
+
+    mods_ascii = collections.OrderedDict()
+    mods_unicode = collections.OrderedDict()
+    unshifted_keys = ""
+    shifted_keys = ""
+    mods_regexes = []
+    for _key in keys:
+        if _key.modifier:
+            mods_ascii[_key.ascii_key] = _key
+            mods_unicode[_key.key] = _key
+            _regex = r"\b(" + "|".join(_key.input_names) + r")\b"
+            mods_regexes.append((_key, _regex))
+        if _key.shifted_key:
+            unshifted_keys += _key.key
+            shifted_keys += _key.shifted_key
+
+    # make some translation tables
+    to_shifted_trans = str.maketrans(unshifted_keys, shifted_keys)
+    to_unshifted_trans = str.maketrans(shifted_keys, unshifted_keys)
 
     @classmethod
     def named_keys(cls, args):
@@ -273,15 +283,15 @@ class MacOS:
         text = re.sub(r"(?<=\S)-(?=\S)", " ", text)
         # remove words that represent modifiers from the text, and add them
         # to the 'mods' array
-        for (modkey, regex) in cls.mods_regex_map:
-            (text, cnt) = re.subn(regex, "", text, re.IGNORECASE)
-            if cnt:
-                mods.append(modkey)
+        for (mod, regex) in cls.mods_regexes:
+            (text, howmany) = re.subn(regex, "", text, re.IGNORECASE)
+            if howmany:
+                mods.append(mod)
         # look for the hyper key
-        (text, cnt) = re.subn(cls.hyper_regex, "", text, re.IGNORECASE)
-        if cnt:
-            for modkey in cls.hyper_mods:
-                mods.append(modkey)
+        (text, howmany) = re.subn(cls.hyper_regex, "", text, re.IGNORECASE)
+        if howmany:
+            for mod in cls.hyper_mods:
+                mods.append(mod)
 
         # process the remainder of the text
         for char in text.strip():
@@ -290,13 +300,13 @@ class MacOS:
 
             if char in cls.mods_unicode:
                 # translate unicode modifier symbols to their plaintext equivilents
-                mods.append(char.translate(cls.unicode_plaintext_mods_trans))
-            elif char in cls.mods_plaintext and char not in mods:
+                mods.append(cls.mods_unicode[char])
+            elif char in cls.mods_ascii and cls.mods_ascii[char] not in mods:
                 # but since plaintext modifiers could also be a key, aka
                 # @$@ really means command-shift-2, we only treat the first
                 # occurance of a plaintext modifier as a modifier, subsequent
                 # occurances are the key
-                mods.append(char)
+                mods.append(cls.mods_ascii[char])
             else:
                 key += char
 
@@ -310,13 +320,13 @@ class MacOS:
                 # command % should be command shift 5
                 # and command ? should be command shift ?
                 # these ↓ are the shifted number keys
-                mods.append("$")  # duplicates will get removed later
+                mods.append(cls.keyname_map["shift"])  # dups will get removed later
                 # the unwritten apple rule that shifted numbers are
                 # written as numbers not their symbols
                 if key in "!@#$%^&*()":
                     key = key.translate(cls.to_unshifted_trans)
             else:
-                if "$" in mods:
+                if cls.keyname_map["shift"] in mods:
                     # shift is in the mods, and the key is unshifted
                     # we should have the shifted symbol unless it is
                     # a number or letter
@@ -340,9 +350,9 @@ class MacOS:
         # remove duplicate modifiers
         mods = list(set(mods))
         # sort the mods to be in Apple's recommended order
-        mods.sort(key=cls.mods_plaintext.index)
+        mods.sort(key=cls.keys.index)
 
-        return MacOSKeyboardShortcut("".join(mods), key)
+        return MacOSKeyboardShortcut(mods, key)
 
 
 class MacOSKeyboardShortcut:
@@ -356,60 +366,66 @@ class MacOSKeyboardShortcut:
 
     def __init__(self, mods, key):
         """
-        mods is a list of ascii symbols representing key modifiers
+        mods is a list of MacOSKey objects which are modifiers
+
         key is the keyname (i.e L, ←, 5 or F12)
-        options are the rendering options to use for this key
         """
         self.mods = mods
         self.key = key
-        self.canonical = self.mods + self.key
 
     def __repr__(self):
         """custom repr"""
-        return "MacOSKeyboardShortcut('{}')".format(self.canonical)
+        return "MacOSKeyboardShortcut('{}')".format(self.render())
 
     def __str__(self):
         """custom string representation"""
-        return self.canonical
+        return self.render()
 
-    def render(self, options):
+    def render(self, options=None):
         """render this key as a string for human consumption"""
         tokens = []
         joiner = ""
-        if options.modifier_symbols:
+        if options and options.modifier_symbols:
             if options.plus_sign:
                 joiner = "+"
             tokens.extend(self.mod_symbols())
-        elif options.modifier_ascii:
+        elif options and options.modifier_ascii:
             joiner = ""
-            tokens.extend(self.mods)
+            tokens.extend(self.mod_ascii())
         else:
             joiner = "-"
             tokens.extend(self.mod_names(options))
-        if options.key_symbols:
+        if options and options.key_symbols:
             tokens.extend(self.key)
         else:
             tokens.append(self.key_name(options))
         return joiner.join(tokens)
 
-    def mod_names(self, options):
+    def mod_names(self, options=None):
         """return a list of modifier names for this shortcut"""
         output = []
-        if options.hyper and self.mods == MacOS.hyper_mods:
+        if options and options.hyper and self.mods == MacOS.hyper_mods:
             output.append(MacOS.hyper_name)
         else:
             for mod in self.mods:
-                output.append(MacOS.mods_names[MacOS.mods_plaintext.index(mod)])
+                output.append(mod.name)
         return output
 
     def mod_symbols(self):
-        """return a list of unicode symbols for this shortcut"""
+        """return a list of unicode symbols representing the modifier names"""
         output = []
         for mod in self.mods:
-            output.append(MacOS.mods_unicode[MacOS.mods_plaintext.index(mod)])
+            output.append(mod.key)
         return output
 
-    def key_name(self, options):
+    def mod_ascii(self):
+        """return a list of ascii symbols representing the modifier names"""
+        output = []
+        for mod in self.mods:
+            output.append(mod.ascii_key)
+        return output
+
+    def key_name(self, options=None):
         """return either the key, or if it has a name return that"""
         # find the key object, if it exists
         keyobj = None
@@ -419,7 +435,7 @@ class MacOSKeyboardShortcut:
                 break
         # if we have a key object, then use it's name and clarified name
         if keyobj:
-            if options.clarify_keys and keyobj.clarified_name:
+            if options and options.clarify_keys and keyobj.clarified_name:
                 return keyobj.clarified_name
             return keyobj.name
         # otherwise
