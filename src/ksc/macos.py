@@ -205,6 +205,8 @@ class MacOS:
     hyper_name = "Hyper"
     hyper_regex = r"\b" + hyper_name.lower() + r"\b"
 
+    # can't refactor mods_ascii and mods_unicode into a single
+    # dictionary, see parse_shortcut() for why
     mods_ascii = collections.OrderedDict()
     mods_unicode = collections.OrderedDict()
     unshifted_keys = ""
