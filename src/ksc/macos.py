@@ -227,7 +227,7 @@ class MacOS:
     to_unshifted_trans = str.maketrans(shifted_keys, unshifted_keys)
 
     @classmethod
-    def named_keys(cls, *, hyper=False, **kwargs):
+    def named_keys(cls, *, hyper=False, **_):
         """Return a string containing a formatted list of all known keys
 
         Designed to be called with the namespace from argparse:
@@ -389,7 +389,17 @@ class MacOSKeyboardShortcut:
         """custom string representation"""
         return self.render()
 
-    def render(self, *, hyper=False, modifier_symbols=False, modifier_ascii=False, plus_sign=False, key_symbols=False, clarify_keys=False, **kwargs):
+    def render(
+        self,
+        *,
+        hyper=False,
+        modifier_symbols=False,
+        modifier_ascii=False,
+        plus_sign=False,
+        key_symbols=False,
+        clarify_keys=False,
+        **_
+    ):
         """render this key as a string for human consumption
 
         Designed to be called with the namespace from argparse:
