@@ -88,7 +88,7 @@ class MacOS:
         # that is a single character
         # order matters for the modifier keys, they need to be in the apple
         # recommended order for displaying modifier keys
-        MacOSKey("*", "Fn", ["func", "function", "fn"], ascii_key="*", modifier=True),
+        MacOSKey("Fn", "Fn", ["func", "function", "fn"], ascii_key="*", modifier=True),
         MacOSKey(
             "⌃",  # this is not a caret, it's another unicode character
             "Control",
@@ -227,8 +227,16 @@ class MacOS:
     to_unshifted_trans = str.maketrans(shifted_keys, unshifted_keys)
 
     @classmethod
-    def named_keys(cls, args):
-        """Return a string containing a formatted list of all known keys"""
+    def named_keys(cls, *, hyper=False, **kwargs):
+        """Return a string containing a formatted list of all known keys
+
+        Designed to be called with the namespace from argparse:
+
+            ksc.MacOS.named_keys(**vars(args)))
+
+        If not using argparse, you can just pass the keyword only
+        arguments as you typically would
+        """
         # start with the modifiers
         output = []
         fmt = "{:12} {:18} {}"
@@ -237,7 +245,7 @@ class MacOS:
         keyflag = True
         for key in cls.keys:
             if key.modifier is False and keyflag is True:
-                if args.hyper:
+                if hyper:
                     output.append(
                         fmt.format(" ", cls.hyper_name, cls.hyper_name.lower())
                     )
@@ -253,17 +261,15 @@ class MacOS:
         return "\n".join(output)
 
     @classmethod
-    def parse_shortcuts(cls, shortcuts):
+    def parse_shortcuts(cls, text):
         """parse a string or array of text into a standard representation of the shortcut
 
-        shortcuts = a string of text to be parsed
-
-        uses args from the command line to influence parsing behavior
+        text = a string of text to be parsed
 
         returns an array of shortcut combinations
         """
         combos = []
-        for combo in re.split(r" [/|] ", shortcuts):
+        for combo in re.split(r" [/|] ", text):
             combos.append(cls.parse_shortcut(combo))
         return combos
 
@@ -383,30 +389,38 @@ class MacOSKeyboardShortcut:
         """custom string representation"""
         return self.render()
 
-    def render(self, options=None):
-        """render this key as a string for human consumption"""
+    def render(self, *, hyper=False, modifier_symbols=False, modifier_ascii=False, plus_sign=False, key_symbols=False, clarify_keys=False, **kwargs):
+        """render this key as a string for human consumption
+
+        Designed to be called with the namespace from argparse:
+
+            combo.render(**vars(args))
+
+        If not using argparse, you can just pass the keyword only
+        arguments as you typically would
+        """
         tokens = []
         joiner = ""
-        if options and options.modifier_symbols:
-            if options.plus_sign:
+        if modifier_symbols:
+            if plus_sign:
                 joiner = "+"
             tokens.extend(self.mod_symbols())
-        elif options and options.modifier_ascii:
+        elif modifier_ascii:
             joiner = ""
             tokens.extend(self.mod_ascii())
         else:
             joiner = "-"
-            tokens.extend(self.mod_names(options))
-        if options and options.key_symbols:
+            tokens.extend(self.mod_names(hyper=hyper))
+        if key_symbols:
             tokens.extend(self.key)
         else:
-            tokens.append(self.key_name(options))
+            tokens.append(self.key_name(clarify_keys=clarify_keys))
         return joiner.join(tokens)
 
-    def mod_names(self, options=None):
+    def mod_names(self, hyper=False):
         """return a list of modifier names for this shortcut"""
         output = []
-        if options and options.hyper and self.mods == MacOS.hyper_mods:
+        if hyper and self.mods == MacOS.hyper_mods:
             output.append(MacOS.hyper_name)
         else:
             for mod in self.mods:
@@ -427,7 +441,7 @@ class MacOSKeyboardShortcut:
             output.append(mod.ascii_key)
         return output
 
-    def key_name(self, options=None):
+    def key_name(self, *, clarify_keys=False):
         """return either the key, or if it has a name return that"""
         # find the key object, if it exists
         keyobj = None
@@ -437,7 +451,7 @@ class MacOSKeyboardShortcut:
                 break
         # if we have a key object, then use it's name and clarified name
         if keyobj:
-            if options and options.clarify_keys and keyobj.clarified_name:
+            if clarify_keys and keyobj.clarified_name:
                 return keyobj.clarified_name
             return keyobj.name
         # otherwise

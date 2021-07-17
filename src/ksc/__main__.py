@@ -143,7 +143,7 @@ def main(argv=None):
 
     if args.list:
         # list all available keys, don't parse any input
-        print(ksc.MacOS.named_keys(args))
+        print(ksc.MacOS.named_keys(**vars(args)))
         return EXIT_SUCCESS
 
     if not args.shortcuts:
@@ -163,7 +163,7 @@ def main(argv=None):
 
     output = []
     for combo in combos:
-        output.append(combo.render(args))
+        output.append(combo.render(**vars(args)))
     print(" ".join(output))
     return EXIT_SUCCESS
 
