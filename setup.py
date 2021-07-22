@@ -17,7 +17,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 setup(
     name="ksc",
     use_scm_version=True,
-    description="A command line tool and python library for documenting keyboard shortcuts.",
+    description="A command line tool and python library for documenting and describing keyboard shortcuts.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Jared Crapo",
@@ -38,7 +38,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    keywords="keyboard shortcut command line",
+    keywords="keyboard shortcut documentation command line",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     # for PEP 561

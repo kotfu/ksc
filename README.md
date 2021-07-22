@@ -1,6 +1,6 @@
 # ksc
 
-A command line tool to create standardized and properly formatted keyboard shortcuts.
+A command line tool to document and describe keyboard shortcuts in a standardized and properly formatted way.
 
 The name of this program is a shorthand for (k)eyboard (s)hort(c)ut.
 
