@@ -75,17 +75,15 @@ class MacOSKey:
         """If the key is a modifier, it also has an ASCII representation, like ~ for Option"""
 
 
-# make a list of keys, if the key isn't in this list (like F or R), then
-# it's just a single character key with nothing special about it
 class MacOS:
     """The keys and their properties for MacOS
 
     Includes methods to parse user input into shortcuts
     """
 
+    # make a list of keys, if the key isn't in this list (like F or R), then
+    # it's just a single character key with nothing special about it
     keys = [
-        # '*' is not unicode for Fn, but their isn't one, and we need something
-        # that is a single character
         # order matters for the modifier keys, they need to be in the apple
         # recommended order for displaying modifier keys
         MacOSKey("Fn", "Fn", ["func", "function", "fn"], ascii_key="*", modifier=True),
