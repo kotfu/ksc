@@ -42,6 +42,8 @@ dev = [
     "build",
     "pytest",
     "pytest-mock",
+    "pytest-cov",
+    "codecov",
     "pylint",
     "black",
     "wheel",
