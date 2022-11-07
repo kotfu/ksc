@@ -158,5 +158,5 @@ def test_mac_list_hyper(capsys):
 
 def test_keyboard_shortcut_dunders():
     combo = ksc.MacOS.parse_shortcut("opt command v")
-    assert combo.__repr__() == "MacOSKeyboardShortcut('{}')".format("Option-Command-V")
+    assert combo.__repr__() == "MacOSKeyboardShortcut('Option-Command-V')"
     assert combo.__str__() == "Option-Command-V"

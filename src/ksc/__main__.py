@@ -148,9 +148,7 @@ def main(argv=None):
 
     if not args.shortcuts:
         print(
-            "{}: error: the following arguments are required: shortcuts".format(
-                parser.prog
-            ),
+            f"{parser.prog}: error: the following arguments are required: shortcuts",
             file=sys.stderr,
         )
         return EXIT_USAGE
@@ -158,7 +156,7 @@ def main(argv=None):
     try:
         combos = ksc.MacOS.parse_shortcuts(" ".join(args.shortcuts))
     except ValueError as err:
-        print("{}: {}".format(parser.prog, err), file=sys.stderr)
+        print(f"{parser.prog}: {err}", file=sys.stderr)
         return EXIT_ERROR
 
     output = []

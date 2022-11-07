@@ -173,7 +173,7 @@ class MacOS:
     # we choose 35 because that's how many are defined in NSEvent()
     # see https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes
     for _num in range(1, 36):
-        _fkey = "F{}".format(_num)
+        _fkey = f"F{_num}"
         keys.append(MacOSKey(_fkey, _fkey, [_fkey.lower()]))
 
     # modifiers is a subset of keys
@@ -351,7 +351,7 @@ class MacOS:
                 # either way, if the key is in the map then it's valid
                 pass
             else:
-                raise ValueError("error parsing '{}'".format(orig_text))
+                raise ValueError(f"error parsing '{orig_text}'")
 
         # remove duplicate modifiers
         mods = list(set(mods))
@@ -381,7 +381,7 @@ class MacOSKeyboardShortcut:
 
     def __repr__(self):
         """custom repr"""
-        return "MacOSKeyboardShortcut('{}')".format(self.render())
+        return f"MacOSKeyboardShortcut('{self.render()}')"
 
     def __str__(self):
         """custom string representation"""
