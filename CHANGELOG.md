@@ -11,6 +11,7 @@ format of this file follows recommendations from [Keep a Changelog](http://keepa
 ### Added
 
 - Add official support for Python 3.10 and 3.11
+- Documentation in the Alfred workflow showing how to install prerequisites
 
 ### Removed
 
