@@ -1,0 +1,57 @@
+# Changelog
+
+All notable changes to [ksc](https://github.com/kotfu/ksc) are documented in this file.
+
+This project uses [Semantic Versioning](http://semver.org/spec/v2.0.0.html) and the
+format of this file follows recommendations from [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
+
+
+## [Unreleased]
+
+### Added
+
+- Add official support for Python 3.10 and 3.11
+
+### Removed
+
+- Drop support for Python 3.6, which is no longer supported
+
+
+## [1.2.2] - 2021-07-10
+
+### Changed
+
+- Packaging improvements
+
+
+## [1.2.1] - 2021-07-10
+
+Release retracted due to packaging errors.
+
+### Changed
+
+- Packaging improvements
+
+
+
+## [1.2.0] - 2021-07-10
+
+Release retracted due to packaging errors.
+
+### Changed
+
+- Packaging improvements
+
+
+## [1.1.0] - 2021-07-01
+
+### Added
+
+- Integration with Keyboard Maestro and Alfred
+
+
+## [1.0.0] - 2021-07-01
+
+### Added
+
+- Introducing ksc, a command line program to document keyboard shortcuts
