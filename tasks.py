@@ -85,6 +85,7 @@ def black_check(context):
 
 
 namespace.add_task(black_check)
+namespace_check.add_task(black_check)
 
 
 @invoke.task
@@ -94,7 +95,6 @@ def black(context):
 
 
 namespace.add_task(black)
-namespace_check.add_task(black)
 
 
 #####
