@@ -396,7 +396,7 @@ class MacOSKeyboardShortcut:
         plus_sign=False,
         key_symbols=False,
         clarify_keys=False,
-        **_
+        **_,
     ):
         """render this key as a string for human consumption
 
