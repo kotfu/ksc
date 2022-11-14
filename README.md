@@ -9,9 +9,9 @@ Inspired by and adapted from Brett Terpstra's
 
 Here's a few examples:
 
-    $ ksc -ms -p command shift 5
+    $ ksc -ms -p command shift %
     ⇧+⌘+5
-    $ ksc -y hyper t
+    $ ksc -y command shift option control t
     Hyper-T
     $ ksc control +
     Control-Shift-+
