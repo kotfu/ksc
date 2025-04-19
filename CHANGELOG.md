@@ -6,7 +6,7 @@ This project uses [Semantic Versioning](http://semver.org/spec/v2.0.0.html) and 
 format of this file follows recommendations from [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased]
+## [1.2.4]
 
 ### Added
 
