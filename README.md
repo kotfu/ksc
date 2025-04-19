@@ -21,9 +21,13 @@ Here's a few examples:
 
 ## Installation
 
-You'll need Python 3. Install with pip:
+You'll need Python 3. Install with [pipx](https://github.com/pypa/pipx):
 
-    $ pip install ksc
+    $ pipx install ksc
+
+or [uv](https://docs.astral.sh/uv/guides/tools/#installing-tools):
+
+    $ uv tool install ksc
 
 
 ## Specifying Keyboard Shortcuts
