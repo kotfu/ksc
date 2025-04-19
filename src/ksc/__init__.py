@@ -26,12 +26,7 @@ ksc is a library and command line program for parsing and standardizing
 keyboard shortcuts
 """
 
-try:
-    # for python 3.8+
-    import importlib.metadata as importlib_metadata
-except ImportError:  # pragma: nocover
-    # for python < 3.8
-    import importlib_metadata
+import importlib.metadata as importlib_metadata
 
 from .macos import (
     MacOS,

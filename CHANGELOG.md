@@ -8,6 +8,14 @@ format of this file follows recommendations from [Keep a Changelog](http://keepa
 
 ## [Unreleased]
 
+### Added
+
+- Support for python 3.12 and 3.13
+
+### Removed
+
+- Support for python 3.7 and 3.8 which are EOL
+
 
 ## [1.2.3] - 2022-11-13
 
