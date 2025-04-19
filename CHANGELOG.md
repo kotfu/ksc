@@ -16,6 +16,10 @@ format of this file follows recommendations from [Keep a Changelog](http://keepa
 
 - Support for python 3.7 and 3.8 which are EOL
 
+### Fixed
+
+- Deprecation warnings emitted in `re.subn()` introduced in python 3.13
+
 
 ## [1.2.3] - 2022-11-13
 

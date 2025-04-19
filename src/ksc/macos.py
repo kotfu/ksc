@@ -290,11 +290,11 @@ class MacOS:
         # remove words that represent modifiers from the text, and add them
         # to the 'mods' array
         for (mod, regex) in cls.mods_regexes:
-            (text, howmany) = re.subn(regex, "", text, re.IGNORECASE)
+            (text, howmany) = re.subn(regex, "", text, flags=re.IGNORECASE)
             if howmany:
                 mods.append(mod)
         # look for the hyper key
-        (text, howmany) = re.subn(cls.hyper_regex, "", text, re.IGNORECASE)
+        (text, howmany) = re.subn(cls.hyper_regex, "", text, flags=re.IGNORECASE)
         if howmany:
             for mod in cls.hyper_mods:
                 mods.append(mod)
