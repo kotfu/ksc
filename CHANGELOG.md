@@ -6,10 +6,7 @@ This project uses [Semantic Versioning](http://semver.org/spec/v2.0.0.html) and 
 format of this file follows recommendations from [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased]
-
-
-## [1.2.4]
+## [1.2.5]
 
 ### Added
 
@@ -22,6 +19,10 @@ format of this file follows recommendations from [Keep a Changelog](http://keepa
 ### Fixed
 
 - Deprecation warnings emitted in `re.subn()` introduced in python 3.13
+
+## [1.2.4] - 2025-04-19
+
+Release withdrawn
 
 
 ## [1.2.3] - 2022-11-13
