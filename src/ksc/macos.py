@@ -289,7 +289,7 @@ class MacOS:
         text = re.sub(r"(?<=\S)-(?=\S)", " ", text)
         # remove words that represent modifiers from the text, and add them
         # to the 'mods' array
-        for (mod, regex) in cls.mods_regexes:
+        for mod, regex in cls.mods_regexes:
             (text, howmany) = re.subn(regex, "", text, flags=re.IGNORECASE)
             if howmany:
                 mods.append(mod)
