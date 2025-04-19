@@ -9,7 +9,7 @@ format of this file follows recommendations from [Keep a Changelog](http://keepa
 ## [Unreleased]
 
 
-## [1.2.5]
+## [1.2.5] - 2025-04-19
 
 ### Added
 
