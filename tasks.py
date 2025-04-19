@@ -5,16 +5,6 @@
 import os
 import shutil
 
-#
-# python 3.11 removed inspect.getargspec, which breaks invoke
-#
-# so we monkeypatch it here until invoke gets this fixed
-import inspect
-
-if not hasattr(inspect, "getargspec"):
-    inspect.getargspec = inspect.getfullargspec
-# end monkeypatch
-
 import invoke
 
 # shared function
