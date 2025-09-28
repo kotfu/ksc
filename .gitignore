@@ -1,5 +1,6 @@
 # pyenv et all
 .python-version
+.venv
 
 # editor/ide stuff
 *~
