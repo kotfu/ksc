@@ -86,6 +86,12 @@ the same as those used by Apple in the
 | Shift      |   `⇧`   |  `$`  |
 | Command    |   `⌘`   |  `@`  |
 
+Apple uses the Globe key as a modifier, but doesn't document an ASCII representation
+for it. When they display it in their documentation, they use the word "Globe" or an
+image, not the globe with meridians unicode symbol that seems like the closest match.
+Because this tool is text based, we use "Globe" if you ask for the Unicode or ASCII
+representation of that key.
+
 
 ## Getting Help
 
