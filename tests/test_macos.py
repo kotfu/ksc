@@ -128,6 +128,10 @@ def test_mac_parse_multiple(inp, count):
         ("~rightclick", "Option-right click"),
         ("-c @.", "Command-Period (.)"),
         ("@⌫", "Command-Delete"),
+        ("-ms globe n", "Globe-N"),
+        ("-ma globe T", "Globe-T"),
+        ("-ms -p globe n", "Globe+N"),
+        ("-ma -p globe T", "Globe+T"),
     ],
 )
 def test_mac_render(cmdline, result, capsys):

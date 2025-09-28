@@ -100,8 +100,16 @@ class MacOS:
         MacOSKey(
             "⌘", "Command", ["command", "cmd", "clover"], ascii_key="@", modifier=True
         ),
-        # no easy way to get a plain (i.e. not blue and white) globe symbol
-        MacOSKey("🌐", "Globe", ["globe"], modifier=True),
+        # the globe key is wierd, it got invented after apple made the ASCII key
+        # binding definitions, so there isn't an ASCII symbol associated with the
+        # globe like there are for the other modifiers.
+        # There is a blue and white double width unicode symbol that is sometimes
+        # used, but that's not what apple uses in their own software, because
+        # when apple references the globe key with a symbol it's never in color, it's
+        # just a line drawn symbol.
+        # So after much debate, I decide to not use the color globe symbol and just
+        # leave the key slot empty.
+        MacOSKey(None, "Globe", ["globe"], modifier=True),
         MacOSKey("⎋", "Escape", ["escape", "esc"]),
         MacOSKey("⇥", "Tab", ["tab"]),
         MacOSKey("⇪", "Caps Lock", ["capslock", "caps"]),
@@ -413,13 +421,32 @@ class MacOSKeyboardShortcut:
         """
         tokens = []
         joiner = ""
+
         if modifier_symbols:
             if plus_sign:
                 joiner = "+"
-            tokens.extend(self.mod_symbols())
+            for sym, name in zip(self.mod_symbols(), self.mod_names()):
+                if sym:
+                    tokens.append(sym)
+                else:
+                    # they asked for a format which can't be produced
+                    # (likely they asked for symbols but have the globe key)
+                    # so we are going to return a string with names instead
+                    joiner = "+" if plus_sign else "-"
+                    tokens.append(name)
         elif modifier_ascii:
             joiner = ""
-            tokens.extend(self.mod_ascii())
+            for asci, name in zip(self.mod_ascii(), self.mod_names()):
+                if asci:
+                    tokens.append(asci)
+                else:
+                    # they asked for a format which can't be produced.
+                    # likely they asked for ascii but gave the globe key
+                    # which doesn't have an ascii representation.
+                    # return a string with names instead, joined by either
+                    # plus or dash
+                    joiner = "+" if plus_sign else "-"
+                    tokens.append(name)
         else:
             joiner = "-"
             tokens.extend(self.mod_names(hyper=hyper))
@@ -440,14 +467,19 @@ class MacOSKeyboardShortcut:
         return output
 
     def mod_symbols(self):
-        """return a list of unicode symbols representing the modifier names"""
+        """return a list of unicode symbols representing the modifier names
+
+        this always returns a list, but elements in the list could be None"""
         output = []
         for mod in self.mods:
             output.append(mod.key)
         return output
 
     def mod_ascii(self):
-        """return a list of ascii symbols representing the modifier names"""
+        """return a list of ascii symbols representing the modifier names
+
+        this always returns a list, but elements in the list could be None
+        """
         output = []
         for mod in self.mods:
             output.append(mod.ascii_key)
