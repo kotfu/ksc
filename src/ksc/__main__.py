@@ -28,6 +28,8 @@ import argparse
 import sys
 import textwrap
 
+from rich.console import Console
+
 import ksc
 
 
@@ -44,7 +46,8 @@ def _build_parser():
 
             command shift F
             option command h
-            control option command space
+            command control option space
+            hyper space
 
         Separate multiple shortcuts with ' / ' or ' | ':
 
@@ -140,10 +143,11 @@ def main(argv=None):
     """main function"""
     parser = _build_parser()
     args = parser.parse_args(argv)
+    console = Console()
 
     if args.list:
         # list all available keys, don't parse any input
-        print(ksc.MacOS.named_keys(**vars(args)))
+        console.print(ksc.MacOS.named_keys(**vars(args)))
         return EXIT_SUCCESS
 
     if not args.shortcuts:

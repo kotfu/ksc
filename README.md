@@ -17,6 +17,8 @@ Here's a few examples:
     Control-Shift-+
     $ ksc ⌘⇧F
     Shift-Command-F
+    $ ksc -y hyper space
+    Hyper-Space
 
 
 ## Installation
