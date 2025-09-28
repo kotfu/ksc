@@ -24,6 +24,7 @@
 """
 Entry point for 'ksc' command line program.
 """
+
 import argparse
 import sys
 import textwrap

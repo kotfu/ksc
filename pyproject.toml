@@ -44,8 +44,7 @@ dev = [
     "pytest-mock",
     "pytest-cov",
     "codecov",
-    "pylint",
-    "black",
+    "ruff",
     "wheel",
     "twine",
     "rope",
@@ -68,6 +67,25 @@ ksc = ["py.typed"]
 [project.scripts]
 ksc = "ksc.__main__:main"
 
-
 [project.urls]
 homepage = "https://github.com/kotfu/ksc"
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]

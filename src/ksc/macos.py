@@ -30,6 +30,7 @@ import re
 
 import rich
 
+
 class MacOSKey:
     """store the name of a key, input names, ane render names for that key"""
 
