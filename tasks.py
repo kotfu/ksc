@@ -33,41 +33,45 @@ namespace.add_collection(namespace_clean, "clean")
 namespace_check = invoke.Collection("check")
 namespace.add_collection(namespace_check, "check")
 
+namespace_publish = invoke.Collection("publish")
+namespace.add_collection(namespace_publish, "publish")
+
 
 #####
 #
-# pytest, pylint, and codecov
+# testing, coverage, and quality
 #
 #####
 @invoke.task
-def pytest(context):
+def test(context):
     "Run tests and code coverage using pytest"
     context.run("pytest", echo=True, pty=True)
 
 
-namespace.add_task(pytest)
-namespace_check.add_task(pytest)
+# in the main namespace, the words are verbs, so we use test here
+namespace.add_task(test)
+# in the check namespace, check is the verb, tests are the noun
+namespace_check.add_task(test, name="tests")
 
 
 @invoke.task
-def pytest_clean(context):
+def pytest_clean(_):
     "Remove pytest cache and code coverage files and directories"
-    # pylint: disable=unused-argument
     dirs = [".pytest_cache", ".cache", ".coverage"]
     rmrf(dirs)
 
 
-namespace_clean.add_task(pytest_clean, "pytest")
+namespace_clean.add_task(pytest_clean, name="tests")
 
 
 @invoke.task
-def pylint(context):
-    "Check code quality using pylint"
-    context.run("pylint src/ksc tests", echo=True)
+def quality(context):
+    "Inspect code quality using ruff"
+    context.run("ruff check *.py src/ksc tests", echo=True)
 
 
-namespace.add_task(pylint)
-namespace_check.add_task(pylint)
+namespace.add_task(quality, name="inspect")
+namespace_check.add_task(quality)
 
 
 @invoke.task
@@ -76,42 +80,29 @@ def format_check(context):
     context.run("ruff format --check *.py tests src", echo=True)
 
 
-namespace.add_task(format_check)
-namespace_check.add_task(format_check)
+namespace_check.add_task(format_check, name="format")
 
 
 @invoke.task
-def format(context):
+def formatt(context):
     """Format code using ruff"""
     context.run("ruff format *.py tests src", echo=True)
 
 
-namespace.add_task(format)
+namespace.add_task(formatt, name="format")
 
 
 #####
 #
-# build and distribute
+# build and publish
 #
 #####
-BUILDDIR = "build"
 DISTDIR = "dist"
 
 
 @invoke.task
-def build_clean(context):
-    "Remove the build directory"
-    # pylint: disable=unused-argument
-    rmrf(BUILDDIR)
-
-
-namespace_clean.add_task(build_clean, "build")
-
-
-@invoke.task
-def dist_clean(context):
+def dist_clean(_):
     "Remove the dist directory"
-    # pylint: disable=unused-argument
     rmrf(DISTDIR)
 
 
@@ -119,9 +110,8 @@ namespace_clean.add_task(dist_clean, "dist")
 
 
 @invoke.task
-def eggs_clean(context):
+def eggs_clean(_):
     "Remove egg directories"
-    # pylint: disable=unused-argument
     dirs = set()
     dirs.add(".eggs")
     for name in os.listdir(os.curdir):
@@ -136,9 +126,8 @@ namespace_clean.add_task(eggs_clean, "eggs")
 
 
 @invoke.task
-def bytecode_clean(context):
+def bytecode_clean(_):
     "Remove __pycache__ directories and *.pyc files"
-    # pylint: disable=unused-argument
     dirs = set()
     for root, dirnames, files in os.walk(os.curdir):
         if "__pycache__" in dirnames:
@@ -154,18 +143,16 @@ namespace_clean.add_task(bytecode_clean, "bytecode")
 
 
 @invoke.task(pre=list(namespace_check.tasks.values()), default=True)
-def check_all(context):
+def check_all(_):
     "Run this before you commit or submit a pull request"
-    # pylint: disable=unused-argument
 
 
 namespace_check.add_task(check_all, "all")
 
 
 @invoke.task(pre=list(namespace_clean.tasks.values()), default=True)
-def clean_all(context):
+def clean_all(_):
     "Clean everything"
-    # pylint: disable=unused-argument
 
 
 namespace_clean.add_task(clean_all, "all")
@@ -173,8 +160,8 @@ namespace_clean.add_task(clean_all, "all")
 
 @invoke.task(pre=[clean_all])
 def build(context):
-    "Create a source distribution"
-    context.run("python -m build")
+    "Create a distribution"
+    context.run("uv build")
 
 
 namespace.add_task(build)
@@ -183,16 +170,16 @@ namespace.add_task(build)
 @invoke.task(pre=[build])
 def pypi(context):
     "Build and upload a distribution to pypi"
-    context.run("twine upload --repository pypi dist/*")
+    context.run("uv publish")
 
 
-namespace.add_task(pypi)
+namespace_publish.add_task(pypi)
 
 
 @invoke.task(pre=[build])
-def pypi_test(context):
+def test_pypi(context):
     "Build and upload a distribution to https://test.pypi.org"
-    context.run("twine upload --repository testpypi dist/*")
+    context.run("uv publish --index test-pypi")
 
 
-namespace.add_task(pypi_test)
+namespace_publish.add_task(test_pypi)
