@@ -28,6 +28,7 @@ Classes to represent MacOS keys and shortcuts
 import collections
 import re
 
+import rich
 
 class MacOSKey:
     """store the name of a key, input names, ane render names for that key"""
@@ -228,37 +229,38 @@ class MacOS:
 
     @classmethod
     def named_keys(cls, *, hyper=False, **_):
-        """Return a string containing a formatted list of all known keys
+        """Return a rich Table() containing a formatted list of all known keys
 
         Designed to be called with the namespace from argparse:
 
-            ksc.MacOS.named_keys(**vars(args)))
+            table = ksc.MacOS.named_keys(**vars(args)))
 
         If not using argparse, you can just pass the keyword only
         arguments as you typically would
         """
+        table = rich.table.Table(
+            box=rich.box.SIMPLE_HEAD,
+            pad_edge=False,
+            show_edge=False,
+        )
+        table.add_column("Key")
+        table.add_column("Name")
+        table.add_column("Inputs")
+
         # start with the modifiers
-        output = []
-        fmt = "{:12} {:18} {}"
-        output.append(fmt.format("Key", "Name", "Inputs"))
-        output.append(fmt.format("-" * 12, "-" * 18, "-" * 50))
-        keyflag = True
+        add_hyper_flag = True
         for key in cls.keys:
-            if key.modifier is False and keyflag is True:
+            if key.modifier is False and add_hyper_flag is True:
                 if hyper:
-                    output.append(
-                        fmt.format(" ", cls.hyper_name, cls.hyper_name.lower())
-                    )
-                keyflag = False
+                    table.add_row(" ", cls.hyper_name, cls.hyper_name.lower())
+                add_hyper_flag = False
             if key.key != key.name or key.clarified_name or key.input_names:
-                output.append(
-                    fmt.format(
-                        key.key,
-                        key.clarified_name or key.name,
-                        ",".join(key.input_names if key.input_names else ""),
-                    )
+                table.add_row(
+                    key.key,
+                    key.clarified_name or key.name,
+                    ",".join(key.input_names if key.input_names else ""),
                 )
-        return "\n".join(output)
+        return table
 
     @classmethod
     def parse_shortcuts(cls, text):
