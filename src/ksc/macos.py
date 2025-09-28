@@ -99,6 +99,8 @@ class MacOS:
         MacOSKey(
             "⌘", "Command", ["command", "cmd", "clover"], ascii_key="@", modifier=True
         ),
+        # no easy way to get a plain (i.e. not blue and white) globe symbol
+        MacOSKey("🌐", "Globe", ["globe"], modifier=True),
         MacOSKey("⎋", "Escape", ["escape", "esc"]),
         MacOSKey("⇥", "Tab", ["tab"]),
         MacOSKey("⇪", "Caps Lock", ["capslock", "caps"]),
