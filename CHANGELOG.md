@@ -6,7 +6,16 @@ This project uses [Semantic Versioning](http://semver.org/spec/v2.0.0.html) and 
 format of this file follows recommendations from [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased]
+## [1.3] - 2025-09-28
+
+### Added
+
+- Support for python 3.14
+- Support for the Globe key
+
+## Removed
+
+- Support for Python 3.9, which is EOL
 
 
 ## [1.2.5] - 2025-04-19
@@ -22,6 +31,7 @@ format of this file follows recommendations from [Keep a Changelog](http://keepa
 ### Fixed
 
 - Deprecation warnings emitted in `re.subn()` introduced in python 3.13
+
 
 ## [1.2.4] - 2025-04-19
 
