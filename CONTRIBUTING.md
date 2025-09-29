@@ -1,3 +1,4 @@
+
 # Contributing
 
 This project uses [uv](https://docs.astral.sh/uv/) as package and project manager.
@@ -54,13 +55,35 @@ in `tasks.py`. See the list of all available tasks with:
 $ invoke -l
 ```
 
+For example, to format the code with ruff do:
+```
+$ invoke format
+```
+
+This project uses setuptools-scm to get the version number in code from the git
+tags. While developing, if you want to to re-calculate the version number, you
+need to reinstall in place with:
+```
+$ uv pip install -e .
+```
+
+You'd think that `uv sync` would do this, but if `uv` doesn't think anything has
+changed, it won't call down into `setuptools-scm`. Using the `uv pip` command
+forces a call to `setuptools-scm`.
+
+Now you'll have a newly calculated version to show when you do:
+```
+$ ksc --version
+```
+
+
 ## Building a Distribution
 
 Build the distribution for this project with:
 ```
 $ invoke build
 ```
-or:
+which just invokes:
 ```
 $ uv build
 ```
@@ -81,12 +104,12 @@ and for real PyPi:
 $ uv auth login upload.pypi.org --token -
 ```
 
-Publish to https://test.pypi.org
+With the credentials available to uv, publish to https://test.pypi.org
 ```
 $ invoke publish.test-pypi
 ```
 
-and publish to https://www.pypi.org
+and then publish to https://www.pypi.org
 ```
 $ invoke publish.pypi
 ```
