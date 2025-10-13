@@ -6,6 +6,9 @@ This project uses [Semantic Versioning](http://semver.org/spec/v2.0.0.html) and 
 format of this file follows recommendations from [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
+## [Unreleased]
+
+
 ## [1.4] - 2025-10-13
 
 - No new features, switched to uv for build and publish
