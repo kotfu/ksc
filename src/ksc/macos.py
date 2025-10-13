@@ -1,6 +1,4 @@
 #
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2021 Jared Crapo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -74,7 +72,8 @@ class MacOSKey:
         """True if this key is a modifier key, like Fn, Shift, etc."""
 
         self.ascii_key = ascii_key
-        """If the key is a modifier, it also has an ASCII representation, like ~ for Option"""
+        """If the key is a modifier, it also has an ASCII representation,
+        like ~ for Option"""
 
 
 class MacOS:
@@ -273,7 +272,8 @@ class MacOS:
 
     @classmethod
     def parse_shortcuts(cls, text):
-        """parse a string or array of text into a standard representation of the shortcut
+        """parse a string or array of text into a standard representation of
+        the shortcut
 
         text = a string of text to be parsed
 
@@ -345,15 +345,14 @@ class MacOS:
                 if key in "!@#$%^&*()":
                     key = key.translate(cls.to_unshifted_trans)
             else:
-                if cls.keyname_map["shift"] in mods:
+                if cls.keyname_map["shift"] in mods and key not in "0123456789":
                     # shift is in the mods, and the key is unshifted
                     # we should have the shifted symbol unless it is
                     # a number or letter
                     # command shift 5 should remain command shift 5
                     # and command shift r should remain command shift r
-                    if key not in "0123456789":
-                        # but shift command / should be shift command ?
-                        key = key.translate(cls.to_shifted_trans)
+                    # but shift command / should be shift command ?
+                    key = key.translate(cls.to_shifted_trans)
 
             # shortcuts always displayed with upper case letters
             key = key.upper()
@@ -426,7 +425,7 @@ class MacOSKeyboardShortcut:
         if modifier_symbols:
             if plus_sign:
                 joiner = "+"
-            for sym, name in zip(self.mod_symbols(), self.mod_names()):
+            for sym, name in zip(self.mod_symbols(), self.mod_names(), strict=True):
                 if sym:
                     tokens.append(sym)
                 else:
@@ -437,7 +436,7 @@ class MacOSKeyboardShortcut:
                     tokens.append(name)
         elif modifier_ascii:
             joiner = ""
-            for asci, name in zip(self.mod_ascii(), self.mod_names()):
+            for asci, name in zip(self.mod_ascii(), self.mod_names(), strict=True):
                 if asci:
                     tokens.append(asci)
                 else:

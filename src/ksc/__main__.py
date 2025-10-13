@@ -1,6 +1,4 @@
 #
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2021 Jared Crapo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,7 +30,6 @@ import textwrap
 from rich.console import Console
 
 import ksc
-
 
 EXIT_SUCCESS = 0
 EXIT_ERROR = 1

@@ -1,7 +1,8 @@
 #
-# -*- coding: utf-8 -*-
+#
 """Development related tasks to be run with 'invoke'"""
 
+import contextlib
 import os
 import shutil
 
@@ -19,10 +20,8 @@ def rmrf(items, verbose=True):
             print(f"Removing {item}")
         shutil.rmtree(item, ignore_errors=True)
         # rmtree doesn't remove bare files
-        try:
+        with contextlib.suppress(FileNotFoundError):
             os.remove(item)
-        except FileNotFoundError:
-            pass
 
 
 # create namespaces

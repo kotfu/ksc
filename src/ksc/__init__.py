@@ -1,6 +1,4 @@
 #
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2021 Jared Crapo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,17 +24,15 @@ ksc is a library and command line program for parsing and standardizing
 keyboard shortcuts
 """
 
-import importlib.metadata as importlib_metadata
+from importlib import metadata
 
-from .macos import (
-    MacOS,
-    MacOSKey,
-    MacOSKeyboardShortcut,
-)
+from .macos import MacOS, MacOSKey, MacOSKeyboardShortcut
+
+__all__ = ["MacOS", "MacOSKey", "MacOSKeyboardShortcut"]
 
 try:
-    __version__ = importlib_metadata.version(__name__)
-except importlib_metadata.PackageNotFoundError:  # pragma: nocover
+    __version__ = metadata.version(__name__)
+except metadata.PackageNotFoundError:  # pragma: nocover
     __version__ = "unknown"
 
 VERSION_STRING = __version__

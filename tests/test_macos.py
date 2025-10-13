@@ -1,6 +1,4 @@
 #
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2021 Jared Crapo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,8 +26,8 @@ import pytest
 
 import ksc
 from ksc.__main__ import (
-    main,
     EXIT_SUCCESS,
+    main,
 )
 
 
@@ -144,16 +142,16 @@ def test_mac_render(cmdline, result, capsys):
 
 
 def test_mac_list(capsys):
-    argv = "-l".split(" ")
+    argv = ["-l"]
     exit_code = main(argv)
     out, _ = capsys.readouterr()
-    assert not ksc.MacOS.hyper_name in out
+    assert ksc.MacOS.hyper_name not in out
     assert "Command" in out
     assert exit_code == EXIT_SUCCESS
 
 
 def test_mac_list_hyper(capsys):
-    argv = "-ly".split(" ")
+    argv = ["-ly"]
     exit_code = main(argv)
     out, _ = capsys.readouterr()
     assert ksc.MacOS.hyper_name in out

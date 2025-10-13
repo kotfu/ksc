@@ -1,6 +1,4 @@
 #
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2021 Jared Crapo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,9 +23,9 @@
 # pylint: disable=missing-module-docstring, unused-variable
 
 from ksc.__main__ import (
-    main,
     EXIT_ERROR,
     EXIT_USAGE,
+    main,
 )
 
 
@@ -41,7 +39,7 @@ def test_mac_list(capsys):
 
 
 def test_mac_parse_err(capsys):
-    argv = "command //".split(" ")
+    argv = ["command", "//"]
     exit_code = main(argv)
     out, err = capsys.readouterr()
     assert err
