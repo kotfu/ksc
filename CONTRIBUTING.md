@@ -91,25 +91,18 @@ $ uv build
 
 ## Publishing to PyPI
 
-You'll need tokens to publish to PyPI. Once you have the tokens, set them up
-in uv. These commands are set up to accept the token on standard input, so
-you'll probably want to have them on the clipboard so you can paste them in.
+You'll need tokens to publish to PyPI. Once you have the tokens (for the test
+instance and the live instance), you need to put the token in the
+`UV_PUBLISH_TOKEN` environment variable. When publishing to test or live,
+you'll have to put the right token in the environment variable to make
+it available to `uv`
 
-For test PyPi:
-```
-$ uv auth login test.pypi.org --token -
-```
-and for real PyPi:
-```
-$ uv auth login upload.pypi.org --token -
-```
-
-With the credentials available to uv, publish to https://test.pypi.org
+With the credentials available to `uv`, publish to https://test.pypi.org
 ```
 $ invoke publish.test-pypi
 ```
 
-and then publish to https://www.pypi.org
+and then switch credentials and publish to https://www.pypi.org
 ```
 $ invoke publish.pypi
 ```
